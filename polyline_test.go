@@ -33,15 +33,10 @@ func TestGetAvoid(t *testing.T) {
 		panic(err)
 	}
 	points := route[0].Points
-	for i := 0; i < len(points); i++ {
+	for i := 0; i < len(points)-1; i++ {
 		for _, avoidPoint := range allAvoidPoints {
-			_, km, _ := geodist.VincentyDistance(
-				geodist.Coord{Lat: points[i].Lat, Lon: points[i].Lon},
-				geodist.Coord{Lat: avoidPoint.Lat, Lon: avoidPoint.Lon})
-
-			// todo  distance = 当前 point 与上一个 point 的距离
-			var distance float64 = 1
-
+			_, distance, _ := geodist.VincentyDistance(geodist.Coord{Lat: points[i].Lat, Lon: points[i].Lon}, geodist.Coord{Lat: points[i+1].Lat, Lon: points[i+1].Lon})
+			_, km, _ := geodist.VincentyDistance(geodist.Coord{Lat: points[i].Lat, Lon: points[i].Lon}, geodist.Coord{Lat: avoidPoint.Lat, Lon: avoidPoint.Lon})
 			if km < distance {
 				needAvoidPoints[avoidPoint] = struct{}{}
 			}
