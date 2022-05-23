@@ -39,7 +39,10 @@ func TestGetAvoid(t *testing.T) {
 				geodist.Coord{Lat: points[i].Lat, Lon: points[i].Lon},
 				geodist.Coord{Lat: avoidPoint.Lat, Lon: avoidPoint.Lon})
 
-			if km < 1 {
+			// todo  distance = 当前 point 与上一个 point 的距离
+			var distance float64 = 1
+
+			if km < distance {
 				needAvoidPoints[avoidPoint] = struct{}{}
 			}
 		}
@@ -51,8 +54,8 @@ func TestGetAvoid(t *testing.T) {
 }
 
 func TestMaxPolyline(t *testing.T) {
-	lbs := tencent.NewLBSClient(TencentKey)
-	route, err := lbs.GetRoute(22.529293, 113.971425, 22.544021, 113.989136)
+	client := tencent.NewLBSClient(TencentKey)
+	route, err := client.GetRoute(22.529293, 113.971425, 22.544021, 113.989136)
 	if err != nil {
 		panic(err)
 	}
