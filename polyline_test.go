@@ -3,54 +3,53 @@ package main
 import (
 	"fmt"
 	"github.com/jftuga/geodist"
-	"github.com/mmfc-labs/driving-assistant/lbs"
-	"github.com/mmfc-labs/driving-assistant/lbs/tencent"
+	"github.com/mmfc-labs/driving-assistant/pkg/lbs"
+	"github.com/mmfc-labs/driving-assistant/pkg/lbs/drive"
+	"github.com/mmfc-labs/driving-assistant/pkg/lbs/drive/tencent"
 	"testing"
 )
 
 const TencentKey = "KN6BZ-G526D-JAI4V-PGSJ2-6L5U6-YYFBV"
 
-func TestGetAvoid(t *testing.T) {
-	allAvoidPoints := []lbs.Coord{
-		{
-			Lat: 22.565615,
-			Lon: 113.86821,
-		},
-		{
-			Lat: 22.557223,
-			Lon: 113.877889,
-		},
-		{
-			Lat: 23.565615,
-			Lon: 114.86821,
-		},
-	}
-	needAvoidPoints := make(map[lbs.Coord]struct{}, 0)
+func TestAvoidByRoad(t *testing.T) {
+	// 探头
+	probe := lbs.LoadProbe()
 
-	client := tencent.NewLBSClient(TencentKey)
-	route, err := client.GetRoute(22.575098, 113.85605, 22.55453, 113.887378)
+	client := tencent.NewClient(TencentKey)
+	route, err := client.GetRoutes(drive.Coord{Lat: 22.575098, Lon: 113.85605}, drive.Coord{Lat: 22.55453, Lon: 113.887378})
 	if err != nil {
 		panic(err)
 	}
-	points := route[0].Points
-	for i := 0; i < len(points)-1; i++ {
-		for _, avoidPoint := range allAvoidPoints {
-			_, distance, _ := geodist.VincentyDistance(geodist.Coord{Lat: points[i].Lat, Lon: points[i].Lon}, geodist.Coord{Lat: points[i+1].Lat, Lon: points[i+1].Lon})
-			_, km, _ := geodist.VincentyDistance(geodist.Coord{Lat: points[i].Lat, Lon: points[i].Lon}, geodist.Coord{Lat: avoidPoint.Lat, Lon: avoidPoint.Lon})
-			if km < distance {
-				needAvoidPoints[avoidPoint] = struct{}{}
-			}
-		}
-	}
+	// 需要避让的区域
+	avoid := lbs.AvoidByRoad{}
+	avoidPoints := avoid.Calculate(route[0].Points, probe.Points)
 
-	for key, _ := range needAvoidPoints {
+	for key, _ := range avoidPoints {
+		fmt.Println("需要规避的点", key)
+	}
+}
+
+func TestAvoidByStraightLine(t *testing.T) {
+	// 探头
+	probe := lbs.LoadProbe()
+
+	client := tencent.NewClient(TencentKey)
+	route, err := client.GetRoutes(drive.Coord{Lat: 22.575098, Lon: 113.85605}, drive.Coord{Lat: 22.55453, Lon: 113.887378})
+	if err != nil {
+		panic(err)
+	}
+	// 需要避让的区域
+	avoid := lbs.AvoidByStraightLine{}
+	avoidPoints := avoid.Calculate(route[0].Points, probe.Points)
+
+	for key, _ := range avoidPoints {
 		fmt.Println("需要规避的点", key)
 	}
 }
 
 func TestMaxPolyline(t *testing.T) {
-	client := tencent.NewLBSClient(TencentKey)
-	route, err := client.GetRoute(22.529293, 113.971425, 22.544021, 113.989136)
+	client := tencent.NewClient(TencentKey)
+	route, err := client.GetRoutes(drive.Coord{Lat: 22.575098, Lon: 113.85605}, drive.Coord{Lat: 22.55453, Lon: 113.887378})
 	if err != nil {
 		panic(err)
 	}

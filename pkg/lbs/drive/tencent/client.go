@@ -4,26 +4,26 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-resty/resty/v2"
-	"github.com/mmfc-labs/driving-assistant/lbs"
+	"github.com/mmfc-labs/driving-assistant/pkg/lbs/drive"
 )
 
-type LBS struct {
+type Client struct {
 	key string
 }
 
-func NewLBSClient(key string) *LBS {
-	c := &LBS{}
+func NewClient(key string) *Client {
+	c := &Client{}
 	c.key = key
 	return c
 }
 
-func (c *LBS) GetRoute(from1, from2, to1, to2 float64) ([]lbs.Route, error) {
+func (c *Client) GetRoutes(from, to drive.Coord) ([]drive.Route, error) {
 	client := resty.New()
 
 	resp, err := client.R().
 		SetQueryParams(map[string]string{
-			"from":     fmt.Sprintf("%f,%f", from1, from2),
-			"to":       fmt.Sprintf("%f,%f", to1, to2),
+			"from":     fmt.Sprintf("%f,%f", from.Lat, from.Lon),
+			"to":       fmt.Sprintf("%f,%f", to.Lat, to.Lon),
 			"output":   "json",
 			"callback": "cb",
 			"key":      c.key,
@@ -48,21 +48,21 @@ func (c *LBS) GetRoute(from1, from2, to1, to2 float64) ([]lbs.Route, error) {
 		return nil, err
 	}
 
-	routes := make([]lbs.Route, 0, len(p.Result.Routes))
+	routes := make([]drive.Route, 0, len(p.Result.Routes))
 
 	for _, route := range p.Result.Routes {
 		for i := 2; i < len(route.Polyline); i++ {
 			route.Polyline[i] = route.Polyline[i-2] + route.Polyline[i]/1000000
 		}
-		points := make([]lbs.Coord, 0, len(route.Polyline)/2)
+		points := make([]drive.Coord, 0, len(route.Polyline)/2)
 		for i := 0; i < len(route.Polyline); i = i + 2 {
-			points = append(points, lbs.Coord{
+			points = append(points, drive.Coord{
 				Lat: route.Polyline[i],
 				Lon: route.Polyline[i+1],
 			})
 
 		}
-		routes = append(routes, lbs.Route{Points: points})
+		routes = append(routes, drive.Route{Points: points})
 
 	}
 	return routes, nil
