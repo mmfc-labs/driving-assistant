@@ -133,8 +133,7 @@ func (c *Client) GetDistanceMatrix(froms, tos []drive.Coord) ([]int, error) {
 		}
 	}
 
-	// todo 每秒请求量已达到上限
-
+	// TODO 暂时解决每秒请求量已达到上限
 	time.Sleep(time.Millisecond * 1000)
 	return result, err
 }

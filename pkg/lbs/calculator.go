@@ -45,6 +45,7 @@ func (c *Calculator) AvoidProbeByRoad(from, to drive.Coord, probePoints []drive.
 		cur := routePoints[i]
 		next := routePoints[i+1]
 
+		// TODO 优化减少api请求数量
 		curToNext, err := c.client.GetDistanceMatrix([]drive.Coord{cur}, []drive.Coord{next})
 		if err != nil {
 			return nil, err
