@@ -23,7 +23,7 @@ func TestAvoidByRoad(t *testing.T) {
 		t.Error(err)
 	}
 
-	//根据直线距离半径计算需要避让的探头
+	//根据路面距离计算需要避让的探头
 	fmt.Println("根据路面距离计算需要避让的探头")
 	for key, _ := range avoidPoints {
 		fmt.Println(key)

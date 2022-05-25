@@ -20,7 +20,7 @@ func NewCalculator(client drive.Client) *Calculator {
 	return c
 }
 
-// AvoidProbeByRoad 根据直线距离半径计算需要避让的探头
+// AvoidProbeByRoad 根据路面距离计算需要避让的探头
 //首先获取到路线A坐标串
 //A1 -> A2 -> A3 -> A4 -> AN
 //
