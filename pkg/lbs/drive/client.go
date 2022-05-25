@@ -2,6 +2,7 @@ package drive
 
 type Client interface {
 	GetRoutes(from, to Coord) ([]Route, error)
+	GetDistanceMatrix(froms, tos []Coord) ([]int, error)
 }
 
 type Route struct {
