@@ -2,25 +2,32 @@ package tencent
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/go-resty/resty/v2"
 	"github.com/mmfc-labs/driving-assistant/pkg/lbs/drive"
+	"github.com/xyctruth/stream"
+	"strings"
+	"time"
 )
 
 type Client struct {
-	key string
+	key        string
+	httpClient *resty.Client
 }
 
 func NewClient(key string) *Client {
-	c := &Client{}
-	c.key = key
+	httpClient := resty.New()
+	httpClient.SetBaseURL("https://apis.map.qq.com/ws")
+	c := &Client{
+		key:        key,
+		httpClient: httpClient,
+	}
 	return c
 }
 
 func (c *Client) GetRoutes(from, to drive.Coord) ([]drive.Route, error) {
-	client := resty.New()
-
-	resp, err := client.R().
+	resp, err := c.httpClient.R().
 		SetQueryParams(map[string]string{
 			"from":     fmt.Sprintf("%f,%f", from.Lat, from.Lon),
 			"to":       fmt.Sprintf("%f,%f", to.Lat, to.Lon),
@@ -28,15 +35,16 @@ func (c *Client) GetRoutes(from, to drive.Coord) ([]drive.Route, error) {
 			"callback": "cb",
 			"key":      c.key,
 		}).
-		Get("https://apis.map.qq.com/ws/direction/v1/driving/")
+		Get("/direction/v1/driving/")
 
 	if err != nil {
 		return nil, err
 	}
 
 	p := struct {
-		Status int
-		Result struct {
+		Status  int
+		Message string
+		Result  struct {
 			Routes []struct {
 				Polyline []float64
 			}
@@ -46,6 +54,10 @@ func (c *Client) GetRoutes(from, to drive.Coord) ([]drive.Route, error) {
 	err = json.Unmarshal(resp.Body(), &p)
 	if err != nil {
 		return nil, err
+	}
+
+	if p.Status > 0 {
+		return nil, errors.New("Routes:" + p.Message)
 	}
 
 	routes := make([]drive.Route, 0, len(p.Result.Routes))
@@ -66,4 +78,63 @@ func (c *Client) GetRoutes(from, to drive.Coord) ([]drive.Route, error) {
 
 	}
 	return routes, nil
+}
+
+func (c *Client) GetDistanceMatrix(froms, tos []drive.Coord) ([]int, error) {
+	reduceFunc := func(r string, e drive.Coord) string {
+		r += fmt.Sprintf("%f,%f;", e.Lat, e.Lon)
+		return r
+	}
+	fromParam := strings.Trim(stream.NewSliceByMapping[drive.Coord, string, string](froms).Reduce(reduceFunc), ";")
+	toParam := strings.Trim(stream.NewSliceByMapping[drive.Coord, string, string](tos).Reduce(reduceFunc), ";")
+
+	resp, err := c.httpClient.R().
+		SetQueryParams(map[string]string{
+			"from":     fromParam,
+			"to":       toParam,
+			"output":   "json",
+			"callback": "cb",
+			"key":      c.key,
+			"mode":     "driving",
+		}).
+		Get("/distance/v1/matrix")
+
+	if err != nil {
+		return nil, err
+	}
+
+	p := struct {
+		Status  int
+		Message string
+		Result  struct {
+			Rows []struct {
+				Elements []struct {
+					Distance int //米
+					Duration int //秒
+				}
+			}
+		}
+	}{}
+
+	err = json.Unmarshal(resp.Body(), &p)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println(p)
+
+	if p.Status > 0 {
+		return nil, errors.New("DistanceMatrix:" + p.Message)
+	}
+
+	result := make([]int, 0, 0)
+	for _, row := range p.Result.Rows {
+		for _, element := range row.Elements {
+			result = append(result, element.Distance)
+		}
+	}
+
+	// todo 每秒请求量已达到上限
+
+	time.Sleep(time.Millisecond * 1000)
+	return result, err
 }

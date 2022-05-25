@@ -2,6 +2,10 @@ github.com/go-resty/resty/v2 v2.7.0 h1:me+K9p3uhSmXtrBZ4k9jcEAfJmuC8IivWHwaLZwPr
 github.com/go-resty/resty/v2 v2.7.0/go.mod h1:9PWDzw47qPphMRFfhsyk0NnSgvluHcljSMVIq3w7q0I=
 github.com/jftuga/geodist v1.0.0 h1:PFPQlZtj10u8ETAYTyxE0DWMl1bwA+Xzrqb4+oLkkC0=
 github.com/jftuga/geodist v1.0.0/go.mod h1:BohEDxpZ8S5ADAxW/9EKPSKWOVl0+3wHENIT40m4UO4=
+github.com/xyctruth/stream v0.0.0-20220505233543-083830ebbfa1 h1:EVI3icXOXfHXN9ValqZBDGmAValXR4tEEP4FrNGWmhY=
+github.com/xyctruth/stream v0.0.0-20220505233543-083830ebbfa1/go.mod h1:Bcnc0Ch+uYGUPex3NTHzVer2I7/tl7cNiAwjudtmR3A=
+golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17 h1:3MTrJm4PyNL9NBqvYDSj3DHl46qQakyfqfWo4jgfaEM=
+golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17/go.mod h1:lgLbSvA5ygNOMpwM/9anMpWVlVJ7Z+cHWq/eFuinpGE=
 golang.org/x/net v0.0.0-20211029224645-99673261e6eb h1:pirldcYWx7rx7kE5r+9WsOXPXK0+WH5+uZ7uPmJ44uM=
 golang.org/x/net v0.0.0-20211029224645-99673261e6eb/go.mod h1:9nx3DQGgdP8bBQD5qxJ1jj9UTztislL4KSBs9R2vV5Y=
 golang.org/x/sys v0.0.0-20201119102817-f84b799fce68/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
