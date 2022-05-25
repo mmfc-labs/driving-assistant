@@ -9,26 +9,30 @@ import (
 	"testing"
 )
 
-const TencentKey = "RB7BZ-CGUKW-AU4RO-RIFUW-57GFS-L4BP7"
+//const TencentKey = "RB7BZ-CGUKW-AU4RO-RIFUW-57GFS-L4BP7"
+const TencentKey = "KN6BZ-G526D-JAI4V-PGSJ2-6L5U6-YYFBV"
 
 func TestAvoidByRoad(t *testing.T) {
-	// 探头
-	calculator := lbs.NewCalculator(tencent.NewClient(TencentKey))
+	// 起点，终点
 	from, to := drive.Coord{Lat: 22.560447, Lon: 113.874653}, drive.Coord{Lat: 22.55453, Lon: 113.887378}
-	probe := lbs.LoadProbe()
-	avoidPoints, err := calculator.AvoidProbeByRoad(from, to, probe.Points)
+
+	calculator := lbs.NewCalculator(tencent.NewClient(TencentKey))
+
+	avoidPoints, err := calculator.AvoidProbeByRoad(from, to)
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
+
+	//根据直线距离半径计算需要避让的探头
 	fmt.Println("根据路面距离计算需要避让的探头")
 	for key, _ := range avoidPoints {
 		fmt.Println(key)
 	}
 
-	// 根据直线距离半径计算需要避让的探头
-	avoidPoints, err = calculator.AvoidProbeByLine(from, to, probe.Points)
+	//根据直线距离半径计算需要避让的探头
+	avoidPoints, err = calculator.AvoidProbeByLine(from, to)
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 	fmt.Println("根据直线距离半径计算需要避让的探头")
 	for key, _ := range avoidPoints {

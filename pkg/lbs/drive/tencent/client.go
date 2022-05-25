@@ -8,7 +8,6 @@ import (
 	"github.com/mmfc-labs/driving-assistant/pkg/lbs/drive"
 	"github.com/xyctruth/stream"
 	"strings"
-	"time"
 )
 
 type Client struct {
@@ -120,7 +119,6 @@ func (c *Client) GetDistanceMatrix(froms, tos []drive.Coord) ([]int, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(p)
 
 	if p.Status > 0 {
 		return nil, errors.New("DistanceMatrix:" + p.Message)
@@ -133,7 +131,5 @@ func (c *Client) GetDistanceMatrix(froms, tos []drive.Coord) ([]int, error) {
 		}
 	}
 
-	// TODO 暂时解决每秒请求量已达到上限
-	time.Sleep(time.Millisecond * 1000)
 	return result, err
 }
