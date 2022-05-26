@@ -5,7 +5,6 @@ import (
 	"github.com/jftuga/geodist"
 	"github.com/mmfc-labs/driving-assistant/pkg/lbs/drive"
 	"github.com/xyctruth/stream"
-	"io/ioutil"
 )
 
 var (
@@ -14,13 +13,26 @@ var (
 
 func init() {
 	G_Probe = &Probe{}
+	probeJson := `
+{
+  "points":[
+    {
+      "lat": 22.558695,
+      "lon": 113.876421
+    },
+    {
+      "lat": 22.557153,
+      "lon": 113.877997
+    },
+    {
+      "lat": 23.565615,
+      "lon": 114.86821
+    }
+  ]
+}
+`
 
-	bytes, err := ioutil.ReadFile("./probe.json")
-	if err != nil {
-		panic(err)
-	}
-
-	err = json.Unmarshal(bytes, G_Probe)
+	err := json.Unmarshal([]byte(probeJson), G_Probe)
 	if err != nil {
 		panic(err)
 	}
