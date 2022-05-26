@@ -5,7 +5,6 @@ import (
 	"github.com/jftuga/geodist"
 	"github.com/mmfc-labs/driving-assistant/pkg/lbs/drive"
 	"github.com/xyctruth/stream"
-	"time"
 )
 
 // Calculator 根据路面距离计算需要避让的探头
@@ -76,7 +75,7 @@ func (c *Calculator) AvoidProbeByRoad(from, to drive.Coord) (map[drive.Coord]str
 				avoidPoints[probePoint] = struct{}{}
 			}
 		})
-		time.Sleep(time.Millisecond * 1000)
+
 	}
 
 	fmt.Println("执行次数：", count)

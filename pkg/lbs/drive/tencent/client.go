@@ -8,6 +8,7 @@ import (
 	"github.com/mmfc-labs/driving-assistant/pkg/lbs/drive"
 	"github.com/xyctruth/stream"
 	"strings"
+	"time"
 )
 
 type Client struct {
@@ -87,6 +88,7 @@ func (c *Client) GetDistanceMatrix(froms, tos []drive.Coord) ([]int, error) {
 	fromParam := strings.Trim(stream.NewSliceByMapping[drive.Coord, string, string](froms).Reduce(reduceFunc), ";")
 	toParam := strings.Trim(stream.NewSliceByMapping[drive.Coord, string, string](tos).Reduce(reduceFunc), ";")
 
+Retry:
 	resp, err := c.httpClient.R().
 		SetQueryParams(map[string]string{
 			"from":     fromParam,
@@ -121,6 +123,11 @@ func (c *Client) GetDistanceMatrix(froms, tos []drive.Coord) ([]int, error) {
 	}
 
 	if p.Status > 0 {
+		if p.Status == 120 {
+			time.Sleep(time.Millisecond * 500)
+			goto Retry
+		}
+
 		return nil, errors.New("DistanceMatrix:" + p.Message)
 	}
 
@@ -130,6 +137,5 @@ func (c *Client) GetDistanceMatrix(froms, tos []drive.Coord) ([]int, error) {
 			result = append(result, element.Distance)
 		}
 	}
-
 	return result, err
 }
