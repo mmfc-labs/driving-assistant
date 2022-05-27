@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <script src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/vue/2.6.14/vue.js"
+          type="application/javascript"></script>
+  <script src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/index.min.js"
+          type="application/javascript"></script>
+  <link href="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/theme-chalk/index.css" type="text/css"
+        rel="stylesheet"/>
+</head>
+<body>
+<div id="app">
+  <el-input
+          style="margin-bottom: 10px;width:200px;"
+          size="mini"
+          v-model="markList"></el-input>
+
+  <div>
+    <a target="_blank" :href="url">{{url}}</a>
+  </div>
+</div>
+<script>
+  var app = new Vue({
+    el: '#app',
+    data: {
+      key: 'KN6BZ-G526D-JAI4V-PGSJ2-6L5U6-YYFBV',
+      markList: "39.96554, 116.26719"
+    },
+    computed: {
+      url: function () {
+        const {key, markList} = this
+        let marker = markList.split(';').map(i => `coord:${i};`).join('|')
+        let url = `https://apis.map.qq.com/tools/poimarker?type=0&marker=${marker}&key=${key}&referer=myapp`
+        return url
+      }
+    }
+  })
+</script>
+</body>
+</html>

@@ -18,19 +18,18 @@ func TestAvoidByRoad(t *testing.T) {
 
 	calculator := lbs.NewCalculator(tencent.NewClient(TencentKey))
 
-	avoidPoints, err := calculator.AvoidProbeByRoad(from, to)
-	if err != nil {
-		t.Error(err)
-	}
-
-	//根据路面距离计算需要避让的探头
-	fmt.Println("根据路面距离计算需要避让的探头")
-	for key, _ := range avoidPoints {
-		fmt.Println(key)
-	}
+	////根据路面距离计算需要避让的探头
+	//avoidPoints, err := calculator.AvoidProbeByRoad(from, to)
+	//if err != nil {
+	//	t.Error(err)
+	//}
+	//fmt.Println("根据路面距离计算需要避让的探头")
+	//for key, _ := range avoidPoints {
+	//	fmt.Println(key)
+	//}
 
 	//根据直线距离半径计算需要避让的探头
-	avoidPoints, err = calculator.AvoidProbeByLine(from, to)
+	avoidPoints, err := calculator.AvoidProbeByLine(from, to)
 	if err != nil {
 		t.Error(err)
 	}
@@ -43,7 +42,7 @@ func TestAvoidByRoad(t *testing.T) {
 func TestMaxPolyline(t *testing.T) {
 	client := tencent.NewClient(TencentKey)
 	from, to := drive.Coord{Lat: 22.575098, Lon: 113.85605}, drive.Coord{Lat: 22.55453, Lon: 113.887378}
-	route, err := client.GetRoutes(from, to)
+	route, err := client.GetRoutes(from, to, nil)
 	if err != nil {
 		panic(err)
 	}

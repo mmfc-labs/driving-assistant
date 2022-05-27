@@ -1,7 +1,7 @@
-package lbs
+package drive
 
 import (
-	"github.com/mmfc-labs/driving-assistant/pkg/lbs/drive"
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -9,15 +9,15 @@ import (
 func TestConvCoordToQuadrilateral(t *testing.T) {
 	tests := []struct {
 		name        string
-		inputCoord  drive.Coord
+		inputCoord  Coord
 		inputOffset float64
-		want        []drive.Coord
+		want        []Coord
 	}{
 		{
 			name:        "case",
-			inputCoord:  drive.Coord{Lat: 1, Lon: 1},
+			inputCoord:  Coord{Lat: 1, Lon: 1},
 			inputOffset: 0.1,
-			want: []drive.Coord{
+			want: []Coord{
 				{Lat: 1.1, Lon: 0.9},
 				{Lat: 1.1, Lon: 1.1},
 				{Lat: 0.9, Lon: 0.9},
@@ -26,9 +26,9 @@ func TestConvCoordToQuadrilateral(t *testing.T) {
 		},
 		{
 			name:        "case",
-			inputCoord:  drive.Coord{Lat: 1.1, Lon: 1.1},
+			inputCoord:  Coord{Lat: 1.1, Lon: 1.1},
 			inputOffset: 0.1,
-			want: []drive.Coord{
+			want: []Coord{
 				{Lat: 1.2, Lon: 1},
 				{Lat: 1.2, Lon: 1.2},
 				{Lat: 1, Lon: 1},
@@ -37,9 +37,9 @@ func TestConvCoordToQuadrilateral(t *testing.T) {
 		},
 		{
 			name:        "case",
-			inputCoord:  drive.Coord{Lat: 1.000001, Lon: 1.000001},
+			inputCoord:  Coord{Lat: 1.000001, Lon: 1.000001},
 			inputOffset: 0.000001,
-			want: []drive.Coord{
+			want: []Coord{
 				{Lat: 1.000002, Lon: 1.000000},
 				{Lat: 1.000002, Lon: 1.000002},
 				{Lat: 1.000000, Lon: 1.000000},
@@ -55,4 +55,10 @@ func TestConvCoordToQuadrilateral(t *testing.T) {
 		})
 	}
 
+}
+
+func TestDecimal(t *testing.T) {
+	c := Coord{Lat: 22.560413, Lon: 113.874613}
+	cs := ConvCoordToQuadrilateral(c, 0.000100)
+	fmt.Println(FmtCoord(cs...))
 }

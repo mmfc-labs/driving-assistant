@@ -26,15 +26,29 @@ func NewClient(key string) *Client {
 	return c
 }
 
-func (c *Client) GetRoutes(from, to drive.Coord) ([]drive.Route, error) {
+func (c *Client) GetRoutes(from, to drive.Coord, avoids []drive.Coord) ([]drive.Route, error) {
+	reduceFunc := func(r string, e drive.Coord) string {
+		quadrilaterals := drive.ConvCoordToQuadrilateral(e, 0.000100)
+		r += strings.Trim(stream.NewSliceByMapping[drive.Coord, string, string](quadrilaterals).Reduce(func(r string, e drive.Coord) string {
+			r += fmt.Sprintf("%f,%f;", e.Lat, e.Lon)
+			return r
+		}), ";") + "|"
+		return r
+	}
+	avoidPolygonsParam := strings.Trim(stream.NewSliceByMapping[drive.Coord, string, string](avoids).Reduce(reduceFunc), "|")
+	params := map[string]string{
+		"from":     fmt.Sprintf("%f,%f", from.Lat, from.Lon),
+		"to":       fmt.Sprintf("%f,%f", to.Lat, to.Lon),
+		"output":   "json",
+		"callback": "cb",
+		"key":      c.key,
+	}
+	if avoidPolygonsParam != "" {
+		params["avoid_polygons"] = avoidPolygonsParam
+	}
+Retry:
 	resp, err := c.httpClient.R().
-		SetQueryParams(map[string]string{
-			"from":     fmt.Sprintf("%f,%f", from.Lat, from.Lon),
-			"to":       fmt.Sprintf("%f,%f", to.Lat, to.Lon),
-			"output":   "json",
-			"callback": "cb",
-			"key":      c.key,
-		}).
+		SetQueryParams(params).
 		Get("/direction/v1/driving/")
 
 	if err != nil {
@@ -57,9 +71,13 @@ func (c *Client) GetRoutes(from, to drive.Coord) ([]drive.Route, error) {
 	}
 
 	if p.Status > 0 {
-		return nil, errors.New("Routes:" + p.Message)
-	}
+		if p.Status == 120 {
+			time.Sleep(time.Millisecond * 500)
+			goto Retry
+		}
 
+		return nil, errors.New("DistanceMatrix:" + p.Message)
+	}
 	routes := make([]drive.Route, 0, len(p.Result.Routes))
 
 	for _, route := range p.Result.Routes {
@@ -96,7 +114,7 @@ Retry:
 			"output":   "json",
 			"callback": "cb",
 			"key":      c.key,
-			"mode":     "driving",
+			"mode":     "walking",
 		}).
 		Get("/distance/v1/matrix")
 
