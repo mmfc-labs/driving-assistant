@@ -3,7 +3,7 @@ package drive
 import "fmt"
 
 type Client interface {
-	GetRoutes(from, to Coord, avoids []Coord) ([]Route, error)
+	GetRoutes(from, to Coord, avoids []Coord, avoidAreaOffset float64) ([]Route, error)
 	GetDistanceMatrix(froms, tos []Coord) ([]int, error)
 }
 

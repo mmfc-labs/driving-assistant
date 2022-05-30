@@ -50,7 +50,7 @@ func TestConvCoordToQuadrilateral(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := ConvCoordToQuadrilateral(tt.inputCoord, tt.inputOffset)
+			got := ConvCoordToAvoidArea(tt.inputCoord, tt.inputOffset)
 			assert.Equal(t, tt.want, got)
 		})
 	}
@@ -59,6 +59,6 @@ func TestConvCoordToQuadrilateral(t *testing.T) {
 
 func TestDecimal(t *testing.T) {
 	c := Coord{Lat: 22.560413, Lon: 113.874613}
-	cs := ConvCoordToQuadrilateral(c, 0.000100)
+	cs := ConvCoordToAvoidArea(c, 0.000100)
 	fmt.Println(FmtCoord(cs...))
 }

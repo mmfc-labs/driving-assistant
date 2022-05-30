@@ -11,22 +11,31 @@ import (
 
 //const TencentKey = "RB7BZ-CGUKW-AU4RO-RIFUW-57GFS-L4BP7"
 const TencentKey = "KN6BZ-G526D-JAI4V-PGSJ2-6L5U6-YYFBV"
+const Offset = 70                // 路面距离计算偏移量，单位米
+const AvoidAreaOffset = 0.000100 // 生成四边形避让区偏移量, 单位经纬度
 
 func TestAvoidByRoad(t *testing.T) {
 	// 起点，终点
 	from, to := drive.Coord{Lat: 22.560447, Lon: 113.874653}, drive.Coord{Lat: 22.55453, Lon: 113.887378}
 
-	calculator := lbs.NewCalculator(tencent.NewClient(TencentKey))
+	calculator := lbs.NewCalculator(tencent.NewClient(TencentKey), Offset, AvoidAreaOffset)
 
-	////根据路面距离计算需要避让的探头
-	//avoidPoints, err := calculator.AvoidProbeByRoad(from, to)
-	//if err != nil {
-	//	t.Error(err)
-	//}
-	//fmt.Println("根据路面距离计算需要避让的探头")
-	//for key, _ := range avoidPoints {
-	//	fmt.Println(key)
-	//}
+	//根据路面距离计算需要避让的探头
+	avoidPoints, err := calculator.AvoidProbeByRoad(from, to)
+	if err != nil {
+		t.Error(err)
+	}
+	fmt.Println("根据路面距离计算需要避让的探头")
+	for key, _ := range avoidPoints {
+		fmt.Println(key)
+	}
+}
+
+func TestAvoidByLine(t *testing.T) {
+	// 起点，终点
+	from, to := drive.Coord{Lat: 22.560447, Lon: 113.874653}, drive.Coord{Lat: 22.55453, Lon: 113.887378}
+
+	calculator := lbs.NewCalculator(tencent.NewClient(TencentKey), Offset, AvoidAreaOffset)
 
 	//根据直线距离半径计算需要避让的探头
 	avoidPoints, err := calculator.AvoidProbeByLine(from, to)
@@ -42,7 +51,7 @@ func TestAvoidByRoad(t *testing.T) {
 func TestMaxPolyline(t *testing.T) {
 	client := tencent.NewClient(TencentKey)
 	from, to := drive.Coord{Lat: 22.575098, Lon: 113.85605}, drive.Coord{Lat: 22.55453, Lon: 113.887378}
-	route, err := client.GetRoutes(from, to, nil)
+	route, err := client.GetRoutes(from, to, nil, 0)
 	if err != nil {
 		panic(err)
 	}

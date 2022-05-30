@@ -7,8 +7,8 @@ import (
 	"strings"
 )
 
-// ConvCoordToQuadrilateral 将1个坐标转换成一个正方形（4个点坐标）
-func ConvCoordToQuadrilateral(c Coord, offset float64) []Coord {
+// ConvCoordToAvoidArea 将1个坐标转换成一个正方形（4个点坐标）
+func ConvCoordToAvoidArea(c Coord, offset float64) []Coord {
 	offsetD := decimal.NewFromFloat(offset)
 	c1 := Coord{
 		Lat: decimal.NewFromFloat(c.Lat).Add(offsetD).Round(6).InexactFloat64(),

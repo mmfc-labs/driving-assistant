@@ -26,10 +26,10 @@ func NewClient(key string) *Client {
 	return c
 }
 
-func (c *Client) GetRoutes(from, to drive.Coord, avoids []drive.Coord) ([]drive.Route, error) {
+func (c *Client) GetRoutes(from, to drive.Coord, avoids []drive.Coord, avoidAreaOffset float64) ([]drive.Route, error) {
 	reduceFunc := func(r string, e drive.Coord) string {
-		quadrilaterals := drive.ConvCoordToQuadrilateral(e, 0.000100)
-		r += strings.Trim(stream.NewSliceByMapping[drive.Coord, string, string](quadrilaterals).Reduce(func(r string, e drive.Coord) string {
+		avoidAreas := drive.ConvCoordToAvoidArea(e, avoidAreaOffset)
+		r += strings.Trim(stream.NewSliceByMapping[drive.Coord, string, string](avoidAreas).Reduce(func(r string, e drive.Coord) string {
 			r += fmt.Sprintf("%f,%f;", e.Lat, e.Lon)
 			return r
 		}), ";") + "|"

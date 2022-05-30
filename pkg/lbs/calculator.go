@@ -9,12 +9,20 @@ import (
 
 // Calculator 根据路面距离计算需要避让的探头
 type Calculator struct {
-	client drive.Client
+	client          drive.Client
+	offset          int     // 路面距离计算偏移量，单位米
+	avoidAreaOffset float64 // 生成四边形避让区偏移量, 单位经纬度
 }
 
-func NewCalculator(client drive.Client) *Calculator {
+// NewCalculator
+// client lbs client
+// offset 路面距离计算偏移量，单位米
+// avoidAreaOffset 生成四边形避让区偏移量, 单位经纬度
+func NewCalculator(client drive.Client, offset int, avoidAreaOffset float64) *Calculator {
 	c := &Calculator{
-		client: client,
+		client:          client,
+		offset:          offset,
+		avoidAreaOffset: avoidAreaOffset,
 	}
 	return c
 }
@@ -44,9 +52,9 @@ Again:
 		avoids = append(avoids, coord)
 	}
 
-	route, err := c.client.GetRoutes(from, to, avoids)
+	route, err := c.client.GetRoutes(from, to, avoids, c.avoidAreaOffset)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	routePoints := route[0].Points
 	fmt.Println(drive.FmtCoord(routePoints...))
@@ -73,14 +81,13 @@ Again:
 		}
 
 		// offset 单位米
-		offset := 70
 		stream.NewSlice(probePoints).ForEach(func(i int, probePoint drive.Coord) {
 			b1 := curToNextAndProbes[0]
 			b2 := curToNextAndProbes[i+1]
 			b3 := probesToNext[i]
-			if b1 >= b2+b3-offset {
+			if b1 >= b2+b3-c.offset {
 				fmt.Printf("needAvoid: %s  \n", drive.FmtCoord(cur, next, probePoint))
-				fmt.Printf("needAvoid: b1:%d, b2:%d, b3:%d offset:%d  \n", b1, b2, b3, offset)
+				fmt.Printf("needAvoid: b1:%d, b2:%d, b3:%d offset:%d  \n", b1, b2, b3, c.offset)
 				avoidsMap[probePoint] = struct{}{}
 				isAgain = true
 			}
@@ -107,9 +114,9 @@ Again:
 		avoids = append(avoids, coord)
 	}
 
-	route, err := c.client.GetRoutes(from, to, avoids)
+	route, err := c.client.GetRoutes(from, to, avoids, c.avoidAreaOffset)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	routePoints := route[0].Points
 
