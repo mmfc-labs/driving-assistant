@@ -85,10 +85,10 @@ Again:
 			b1 := curToNextAndProbes[0]
 			b2 := curToNextAndProbes[i+1]
 			b3 := probesToNext[i]
-			//fmt.Printf("gap:%d \n", b1-(b2+b3-c.offset))
-			if b1 >= b2+b3-c.offset {
+			gap := b1 - (b2 + b3 - c.offset)
+			if gap > 0 {
 				fmt.Printf("needAvoid: %s  \n", drive.FmtCoord(cur, next, probePoint))
-				fmt.Printf("needAvoid: b1:%d, b2:%d, b3:%d offset:%d  \n", b1, b2, b3, c.offset)
+				fmt.Printf("needAvoid: b1:%d, b2:%d, b3:%d, offset:%d, gap:%d \n", b1, b2, b3, c.offset, gap)
 				avoidsMap[probePoint] = struct{}{}
 				isAgain = true
 			}
@@ -138,7 +138,7 @@ Again:
 			if gap > 0 {
 				avoidsMap[probePoint] = struct{}{}
 				isAgain = true
-				fmt.Printf("needAvoid: b1:%f, b2:%f, b3:%f, gap:%f  \n", b1, b2, b3, gap)
+				fmt.Printf("needAvoid: b1:%f, b2:%f, b3:%f, offset:%d, gap:%f  \n", b1, b2, b3, c.offset, gap)
 				fmt.Printf("needAvoid: %s  \n", drive.FmtCoord(cur, next, probePoint))
 			}
 		})
