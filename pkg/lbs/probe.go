@@ -17,11 +17,20 @@ func init() {
 {
   "points":[
     {
-      "lat": 22.558695,
-      "lon": 113.876421
+      "lat": 22.57682,
+      "lon": 113.913137
+    },
+    {
+      "lat": 22.57759,
+      "lon": 113.914101
+    },
+    {
+      "lat": 23.576349,
+      "lon": 114.914133
     }
   ]
 }
+
 `
 
 	err := json.Unmarshal([]byte(probeJson), G_Probe)

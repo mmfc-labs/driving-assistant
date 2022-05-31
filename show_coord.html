@@ -1,42 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Title</title>
-  <script src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/vue/2.6.14/vue.js"
-          type="application/javascript"></script>
-  <script src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/index.min.js"
-          type="application/javascript"></script>
-  <link href="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/theme-chalk/index.css" type="text/css"
-        rel="stylesheet"/>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+  <title>普通Marker</title>
 </head>
+<script charset="utf-8" src="https://map.qq.com/api/gljs?v=1.exp&key=KN6BZ-G526D-JAI4V-PGSJ2-6L5U6-YYFBV"></script>
+<script src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/vue/2.6.14/vue.js"
+        type="application/javascript"></script>
+<script src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/index.min.js"
+        type="application/javascript"></script>
+<link href="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/element-ui/2.15.7/theme-chalk/index.css" type="text/css"
+      rel="stylesheet"/>
+<style type="text/css">
+  html,
+  body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  #container {
+    width: 100%;
+    height: 100%;
+  }
+
+  .btnContainer {
+    position: absolute;
+    left: 20px;
+    top: 20px;
+    z-index: 10000;
+  }
+
+</style>
 <body>
-<div id="app">
+<div class="btnContainer" id="app">
   <el-input
           style="margin-bottom: 10px;width:200px;"
           size="mini"
-          v-model="markList"></el-input>
-
-  <div>
-    <a target="_blank" :href="url">{{url}}</a>
-  </div>
+          v-model="markListStr"></el-input>
+  <el-button @click="show" size="mini">显示</el-button>
 </div>
-<script>
+<div id="container"></div>
+<script type="text/javascript">
   var app = new Vue({
     el: '#app',
     data: {
-      key: 'KN6BZ-G526D-JAI4V-PGSJ2-6L5U6-YYFBV',
-      markList: "39.96554, 116.26719"
+      markListStr: "39.96554, 116.26719"
     },
     computed: {
-      url: function () {
-        const {key, markList} = this
-        let marker = markList.split(';').map(i => `coord:${i};`).join('|')
-        let url = `https://apis.map.qq.com/tools/poimarker?type=0&marker=${marker}&key=${key}&referer=myapp`
-        return url
+      markList: function () {
+        return this.markListStr.split(';').map((item) => {
+          const point = item.split(',')
+          return new TMap.LatLng(point[0], point[1])
+        })
+      }
+    },
+    mounted() {
+      // 初始化地图
+      this.map = new TMap.Map('container', {
+        zoom: 17, // 设置地图缩放
+        pitch: 0, // 俯仰度
+        rotation: 0, // 旋转角度
+      });
+    },
+    methods: {
+      show() {
+        if (!this.marker) {
+          this.marker = new TMap.MultiMarker({
+            map: this.map,
+            styles: {
+              // 点标记样式
+              marker: new TMap.MarkerStyle({
+                width: 10, // 样式宽
+                height: 15, // 样式高
+                anchor: {x: 5, y: 15}, // 描点位置
+              }),
+            },
+          });
+        }
+        // 清空点
+        this.marker.setGeometries([])
+
+        this.marker.add(this.markList.map((item, index) => {
+          return {
+            "position": item,
+            'content': `点${index + 1}`,
+          }
+        }))
+
+        var latlngBounds = new TMap.LatLngBounds();
+        this.markList.forEach((item) => {
+          latlngBounds.extend(item);
+        })
+        this.map.fitBounds(latlngBounds);
       }
     }
   })
+
+
 </script>
 </body>
 </html>

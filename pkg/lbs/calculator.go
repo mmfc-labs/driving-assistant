@@ -85,6 +85,7 @@ Again:
 			b1 := curToNextAndProbes[0]
 			b2 := curToNextAndProbes[i+1]
 			b3 := probesToNext[i]
+			//fmt.Printf("gap:%d \n", b1-(b2+b3-c.offset))
 			if b1 >= b2+b3-c.offset {
 				fmt.Printf("needAvoid: %s  \n", drive.FmtCoord(cur, next, probePoint))
 				fmt.Printf("needAvoid: b1:%d, b2:%d, b3:%d offset:%d  \n", b1, b2, b3, c.offset)
@@ -101,7 +102,7 @@ Again:
 	return avoidsMap, nil
 }
 
-//AvoidProbeByLine 根据直线距离半径计算需要避让的探头
+//AvoidProbeByLine 根据直线距离计算需要避让的探头
 func (c *Calculator) AvoidProbeByLine(from, to drive.Coord) (map[drive.Coord]struct{}, error) {
 	avoidsMap := make(map[drive.Coord]struct{}, 0)
 	count := 0
@@ -119,18 +120,26 @@ Again:
 		return nil, err
 	}
 	routePoints := route[0].Points
+	fmt.Println(drive.FmtCoord(routePoints...))
 
 	for i := 0; i < len(routePoints)-1; i++ {
 		cur := routePoints[i]
 		next := routePoints[i+1]
-		probePoints := G_Probe.All()
+		probePoints := G_Probe.Near(cur, 5)
+		if len(probePoints) == 0 {
+			continue
+		}
 		stream.NewSlice(probePoints).ForEach(func(_ int, probePoint drive.Coord) {
-			_, distance, _ := geodist.VincentyDistance(geodist.Coord{Lat: cur.Lat, Lon: cur.Lon}, geodist.Coord{Lat: next.Lat, Lon: next.Lon})
-			_, probeDistance, _ := geodist.VincentyDistance(geodist.Coord{Lat: cur.Lat, Lon: cur.Lon}, geodist.Coord{Lat: probePoint.Lat, Lon: probePoint.Lon})
-			if probeDistance < distance {
-				fmt.Printf("needAvoid: %s  \n", drive.FmtCoord(cur, next, probePoint))
+			_, b1, _ := geodist.VincentyDistance(geodist.Coord{Lat: cur.Lat, Lon: cur.Lon}, geodist.Coord{Lat: next.Lat, Lon: next.Lon})
+			_, b2, _ := geodist.VincentyDistance(geodist.Coord{Lat: cur.Lat, Lon: cur.Lon}, geodist.Coord{Lat: probePoint.Lat, Lon: probePoint.Lon})
+			_, b3, _ := geodist.VincentyDistance(geodist.Coord{Lat: probePoint.Lat, Lon: probePoint.Lon}, geodist.Coord{Lat: next.Lat, Lon: next.Lon})
+			gap := b1 - (b2 + b3 - (float64(c.offset) / 1000))
+
+			if gap > 0 {
 				avoidsMap[probePoint] = struct{}{}
 				isAgain = true
+				fmt.Printf("needAvoid: b1:%f, b2:%f, b3:%f, gap:%f  \n", b1, b2, b3, gap)
+				fmt.Printf("needAvoid: %s  \n", drive.FmtCoord(cur, next, probePoint))
 			}
 		})
 	}
