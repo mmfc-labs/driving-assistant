@@ -9,12 +9,20 @@ import (
 
 // Calculator 根据路面距离计算需要避让的探头
 type Calculator struct {
-	client drive.Client
+	client          drive.Client
+	offset          int     // 路面距离计算偏移量，单位米
+	avoidAreaOffset float64 // 生成四边形避让区偏移量, 单位经纬度
 }
 
-func NewCalculator(client drive.Client) *Calculator {
+// NewCalculator
+// client lbs client
+// offset 路面距离计算偏移量，单位米
+// avoidAreaOffset 生成四边形避让区偏移量, 单位经纬度
+func NewCalculator(client drive.Client, offset int, avoidAreaOffset float64) *Calculator {
 	c := &Calculator{
-		client: client,
+		client:          client,
+		offset:          offset,
+		avoidAreaOffset: avoidAreaOffset,
 	}
 	return c
 }
@@ -32,15 +40,25 @@ func NewCalculator(client drive.Client) *Calculator {
 //
 //B1 >= B2+B3 即路过探头
 func (c *Calculator) AvoidProbeByRoad(from, to drive.Coord) (map[drive.Coord]struct{}, error) {
-	route, err := c.client.GetRoutes(from, to)
+	avoidsMap := make(map[drive.Coord]struct{}, 0)
+	count := 0
+
+Again:
+	count++
+	avoids := make([]drive.Coord, 0, len(avoidsMap))
+	isAgain := false
+
+	for coord, _ := range avoidsMap {
+		avoids = append(avoids, coord)
+	}
+
+	route, err := c.client.GetRoutes(from, to, avoids, c.avoidAreaOffset)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	routePoints := route[0].Points
-
+	fmt.Println(drive.FmtCoord(routePoints...))
 	// 需要避让的区域
-	avoidPoints := make(map[drive.Coord]struct{}, 0)
-	count := 0
 
 	for i := 0; i < len(routePoints)-1; i++ {
 		cur := routePoints[i]
@@ -51,7 +69,6 @@ func (c *Calculator) AvoidProbeByRoad(from, to drive.Coord) (map[drive.Coord]str
 		if len(probePoints) == 0 {
 			continue
 		}
-		count++
 
 		curToNextAndProbes, err := c.client.GetDistanceMatrix([]drive.Coord{cur}, append([]drive.Coord{next}, probePoints...))
 		if err != nil {
@@ -64,46 +81,72 @@ func (c *Calculator) AvoidProbeByRoad(from, to drive.Coord) (map[drive.Coord]str
 		}
 
 		// offset 单位米
-		offset := 100
 		stream.NewSlice(probePoints).ForEach(func(i int, probePoint drive.Coord) {
 			b1 := curToNextAndProbes[0]
 			b2 := curToNextAndProbes[i+1]
 			b3 := probesToNext[i]
-
-			fmt.Printf("b1:%d, b2:%d, b3:%d, isAvoid:%v  \n", b1, b2, b3, b1 >= b2+b3-offset)
-			if b1 >= b2+b3-offset {
-				avoidPoints[probePoint] = struct{}{}
+			//fmt.Printf("gap:%d \n", b1-(b2+b3-c.offset))
+			if b1 >= b2+b3-c.offset {
+				fmt.Printf("needAvoid: %s  \n", drive.FmtCoord(cur, next, probePoint))
+				fmt.Printf("needAvoid: b1:%d, b2:%d, b3:%d offset:%d  \n", b1, b2, b3, c.offset)
+				avoidsMap[probePoint] = struct{}{}
+				isAgain = true
 			}
 		})
-
 	}
-
+	if isAgain {
+		fmt.Println("again")
+		goto Again
+	}
 	fmt.Println("执行次数：", count)
-	return avoidPoints, nil
+	return avoidsMap, nil
 }
 
-//AvoidProbeByLine 根据直线距离半径计算需要避让的探头
+//AvoidProbeByLine 根据直线距离计算需要避让的探头
 func (c *Calculator) AvoidProbeByLine(from, to drive.Coord) (map[drive.Coord]struct{}, error) {
-	route, err := c.client.GetRoutes(from, to)
+	avoidsMap := make(map[drive.Coord]struct{}, 0)
+	count := 0
+Again:
+	count++
+	avoids := make([]drive.Coord, 0, len(avoidsMap))
+	isAgain := false
+
+	for coord, _ := range avoidsMap {
+		avoids = append(avoids, coord)
+	}
+
+	route, err := c.client.GetRoutes(from, to, avoids, c.avoidAreaOffset)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	routePoints := route[0].Points
-
-	// 需要避让的区域
-	avoidPoints := make(map[drive.Coord]struct{}, 0)
+	fmt.Println(drive.FmtCoord(routePoints...))
 
 	for i := 0; i < len(routePoints)-1; i++ {
 		cur := routePoints[i]
 		next := routePoints[i+1]
-		probePoints := G_Probe.All()
+		probePoints := G_Probe.Near(cur, 5)
+		if len(probePoints) == 0 {
+			continue
+		}
 		stream.NewSlice(probePoints).ForEach(func(_ int, probePoint drive.Coord) {
-			_, distance, _ := geodist.VincentyDistance(geodist.Coord{Lat: cur.Lat, Lon: cur.Lon}, geodist.Coord{Lat: next.Lat, Lon: next.Lon})
-			_, probeDistance, _ := geodist.VincentyDistance(geodist.Coord{Lat: cur.Lat, Lon: cur.Lon}, geodist.Coord{Lat: probePoint.Lat, Lon: probePoint.Lon})
-			if probeDistance < distance {
-				avoidPoints[probePoint] = struct{}{}
+			_, b1, _ := geodist.VincentyDistance(geodist.Coord{Lat: cur.Lat, Lon: cur.Lon}, geodist.Coord{Lat: next.Lat, Lon: next.Lon})
+			_, b2, _ := geodist.VincentyDistance(geodist.Coord{Lat: cur.Lat, Lon: cur.Lon}, geodist.Coord{Lat: probePoint.Lat, Lon: probePoint.Lon})
+			_, b3, _ := geodist.VincentyDistance(geodist.Coord{Lat: probePoint.Lat, Lon: probePoint.Lon}, geodist.Coord{Lat: next.Lat, Lon: next.Lon})
+			gap := b1 - (b2 + b3 - (float64(c.offset) / 1000))
+
+			if gap > 0 {
+				avoidsMap[probePoint] = struct{}{}
+				isAgain = true
+				fmt.Printf("needAvoid: b1:%f, b2:%f, b3:%f, gap:%f  \n", b1, b2, b3, gap)
+				fmt.Printf("needAvoid: %s  \n", drive.FmtCoord(cur, next, probePoint))
 			}
 		})
 	}
-	return avoidPoints, nil
+	if isAgain {
+		fmt.Println("again")
+		goto Again
+	}
+	fmt.Println("执行次数：", count)
+	return avoidsMap, nil
 }
