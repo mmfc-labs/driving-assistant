@@ -14,7 +14,10 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	_ "github.com/mmfc-labs/driving-assistant/docs"
 	log "github.com/sirupsen/logrus"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	"github.com/swaggo/gin-swagger/swaggerFiles"
 )
 
 type APIServer struct {
@@ -36,6 +39,7 @@ func NewAPIServer(opt Options) *APIServer {
 		c.JSON(200, gin.H{"version": version.Version, "gitRevision": version.GitRevision})
 	})
 	router.Use(HandleCors).GET("/api/avoids", apiServer.avoids)
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	srv := &http.Server{
 		Addr:    opt.Addr,
@@ -68,6 +72,14 @@ func (s *APIServer) Run() {
 	}()
 }
 
+// avoids
+// @Tags driving
+// @Summary 修改渠道用户
+// @accept application/json
+// @Produce application/json
+// @Param data query AvoidsRequest true "AvoidsRequest"
+// @success 200 {object} Response{data=[][]drive.Coord} "返回结果"
+// @Router /api/avoids [get]
 func (s *APIServer) avoids(c *gin.Context) {
 	var (
 		req AvoidsRequest
@@ -103,10 +115,10 @@ func (s *APIServer) avoids(c *gin.Context) {
 }
 
 type AvoidsRequest struct {
-	FromLat float64 `form:"from_lat" validate:"required"`
-	FromLon float64 `form:"from_lon" validate:"required"`
-	ToLat   float64 `form:"to_lat" validate:"required"`
-	ToLon   float64 `form:"to_lon" validate:"required" label:"to_lon"`
+	FromLat float64 `form:"from_lat" json:"from_lat" validate:"required"`
+	FromLon float64 `form:"from_lon" json:"from_lon" validate:"required"`
+	ToLat   float64 `form:"to_lat" json:"to_lat" validate:"required"`
+	ToLon   float64 `form:"to_lon" json:"to_lon" validate:"required" label:"to_lon"`
 }
 
 func Result(httpStatus int, data interface{}, errorMsg string, c *gin.Context) {

@@ -1,0 +1,58 @@
+definitions:
+  apiserver.Response:
+    properties:
+      data: {}
+      error_msg:
+        type: string
+    type: object
+  drive.Coord:
+    properties:
+      lat:
+        type: number
+      lon:
+        type: number
+    type: object
+info:
+  contact: {}
+paths:
+  /api/avoids:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - in: query
+        name: from_lat
+        required: true
+        type: number
+      - in: query
+        name: from_lon
+        required: true
+        type: number
+      - in: query
+        name: to_lat
+        required: true
+        type: number
+      - in: query
+        name: to_lon
+        required: true
+        type: number
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            allOf:
+            - $ref: '#/definitions/apiserver.Response'
+            - properties:
+                data:
+                  items:
+                    items:
+                      $ref: '#/definitions/drive.Coord'
+                    type: array
+                  type: array
+              type: object
+      summary: 修改渠道用户
+      tags:
+      - driving
+swagger: "2.0"
