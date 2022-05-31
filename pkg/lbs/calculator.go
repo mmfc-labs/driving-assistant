@@ -120,7 +120,7 @@ Again:
 		return nil, err
 	}
 	routePoints := route[0].Points
-	fmt.Println(drive.FmtCoord(routePoints...))
+	fmt.Println("路线规划,坐标串:", drive.FmtCoord(routePoints...))
 
 	for i := 0; i < len(routePoints)-1; i++ {
 		cur := routePoints[i]
@@ -134,12 +134,11 @@ Again:
 			_, b2, _ := geodist.VincentyDistance(geodist.Coord{Lat: cur.Lat, Lon: cur.Lon}, geodist.Coord{Lat: probePoint.Lat, Lon: probePoint.Lon})
 			_, b3, _ := geodist.VincentyDistance(geodist.Coord{Lat: probePoint.Lat, Lon: probePoint.Lon}, geodist.Coord{Lat: next.Lat, Lon: next.Lon})
 			gap := b1 - (b2 + b3 - (float64(c.offset) / 1000))
-
+			fmt.Printf("Debug: %s  \n", drive.FmtCoord(cur, next, probePoint))
+			fmt.Printf("Debug: b1:%f, b2:%f, b3:%f, offset:%d, gap:%f  \n", b1, b2, b3, c.offset, gap)
 			if gap > 0 {
 				avoidsMap[probePoint] = struct{}{}
 				isAgain = true
-				fmt.Printf("needAvoid: b1:%f, b2:%f, b3:%f, offset:%d, gap:%f  \n", b1, b2, b3, c.offset, gap)
-				fmt.Printf("needAvoid: %s  \n", drive.FmtCoord(cur, next, probePoint))
 			}
 		})
 	}
