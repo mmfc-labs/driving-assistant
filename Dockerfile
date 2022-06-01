@@ -19,4 +19,4 @@ COPY config.yaml ./config.yaml
 
 EXPOSE 80 80
 
-CMD ["./driving-assistant"]
+ENTRYPOINT ["./driving-assistant"]
