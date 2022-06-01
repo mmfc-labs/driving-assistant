@@ -5,6 +5,15 @@ definitions:
       error_msg:
         type: string
     type: object
+  apiserver.RouteResponse:
+    properties:
+      avoid_areas:
+        items:
+          items:
+            $ref: '#/definitions/drive.Coord'
+          type: array
+        type: array
+    type: object
   drive.Coord:
     properties:
       lat:
@@ -15,7 +24,7 @@ definitions:
 info:
   contact: {}
 paths:
-  /api/avoids:
+  /api/route:
     get:
       consumes:
       - application/json
@@ -46,13 +55,9 @@ paths:
             - $ref: '#/definitions/apiserver.Response'
             - properties:
                 data:
-                  items:
-                    items:
-                      $ref: '#/definitions/drive.Coord'
-                    type: array
-                  type: array
+                  $ref: '#/definitions/apiserver.RouteResponse'
               type: object
-      summary: 修改渠道用户
+      summary: 路线规划，获取需要避让的区域
       tags:
       - driving
 swagger: "2.0"

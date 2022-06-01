@@ -39,7 +39,7 @@ func NewAPIServer(opt Options) *APIServer {
 	router.GET("/api/version", func(c *gin.Context) {
 		c.JSON(200, gin.H{"version": version.Version, "gitRevision": version.GitRevision})
 	})
-	router.Use(HandleCors).GET("/api/avoids", apiServer.avoids)
+	router.Use(HandleCors).GET("/api/route", apiServer.route)
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	srv := &http.Server{
@@ -83,17 +83,17 @@ func (s *APIServer) Run() {
 	}()
 }
 
-// avoids
+// route
 // @Tags driving
-// @Summary 修改渠道用户
+// @Summary 路线规划，获取需要避让的区域
 // @accept application/json
 // @Produce application/json
-// @Param data query AvoidsRequest true "AvoidsRequest"
-// @success 200 {object} Response{data=[][]drive.Coord} "返回结果"
-// @Router /api/avoids [get]
-func (s *APIServer) avoids(c *gin.Context) {
+// @Param data query RouteRequest true "RouteRequest"
+// @success 200 {object} Response{data=RouteResponse} "返回结果"
+// @Router /api/route [get]
+func (s *APIServer) route(c *gin.Context) {
 	var (
-		req AvoidsRequest
+		req RouteRequest
 	)
 	if err := c.ShouldBindQuery(&req); err != nil {
 		Result(http.StatusBadRequest, nil, err.Error(), c)
@@ -122,14 +122,19 @@ func (s *APIServer) avoids(c *gin.Context) {
 	for a, _ := range avoidPoints {
 		avoidArea = append(avoidArea, drive.ConvCoordToAvoidArea(a, config.AvoidAreaOffset))
 	}
-	Result(http.StatusOK, avoidArea, "", c)
+
+	Result(http.StatusOK, RouteResponse{AvoidAreas: avoidArea}, "", c)
 }
 
-type AvoidsRequest struct {
+type RouteRequest struct {
 	FromLat float64 `form:"from_lat" json:"from_lat" validate:"required"`
 	FromLon float64 `form:"from_lon" json:"from_lon" validate:"required"`
 	ToLat   float64 `form:"to_lat" json:"to_lat" validate:"required"`
 	ToLon   float64 `form:"to_lon" json:"to_lon" validate:"required" label:"to_lon"`
+}
+
+type RouteResponse struct {
+	AvoidAreas [][]drive.Coord `json:"avoid_areas"`
 }
 
 func Result(httpStatus int, data interface{}, errorMsg string, c *gin.Context) {
@@ -143,8 +148,4 @@ func Result(httpStatus int, data interface{}, errorMsg string, c *gin.Context) {
 type Response struct {
 	Data     interface{} `json:"data"`
 	ErrorMsg string      `json:"error_msg"`
-}
-
-type AvoidsResponse struct {
-	AvoidArea [][]drive.Coord
 }

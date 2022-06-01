@@ -4,7 +4,7 @@
         "contact": {}
     },
     "paths": {
-        "/api/avoids": {
+        "/api/route": {
             "get": {
                 "consumes": [
                     "application/json"
@@ -15,7 +15,7 @@
                 "tags": [
                     "driving"
                 ],
-                "summary": "修改渠道用户",
+                "summary": "路线规划，获取需要避让的区域",
                 "parameters": [
                     {
                         "type": "number",
@@ -54,13 +54,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "array",
-                                                "items": {
-                                                    "$ref": "#/definitions/drive.Coord"
-                                                }
-                                            }
+                                            "$ref": "#/definitions/apiserver.RouteResponse"
                                         }
                                     }
                                 }
@@ -78,6 +72,20 @@
                 "data": {},
                 "error_msg": {
                     "type": "string"
+                }
+            }
+        },
+        "apiserver.RouteResponse": {
+            "type": "object",
+            "properties": {
+                "avoid_areas": {
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/drive.Coord"
+                        }
+                    }
                 }
             }
         },
