@@ -61,7 +61,7 @@ Again:
 		return nil, err
 	}
 	routePoints := route[0].Points
-	log.Debug("routes:", drive.FmtCoord(routePoints...))
+	log.Info("routes:", drive.FmtCoord(routePoints...))
 	// 需要避让的区域
 
 	for i := 0; i < len(routePoints)-1; i++ {
@@ -91,8 +91,8 @@ Again:
 			b3 := probesToNext[i]
 			gap := b1 - (b2 + b3 - c.setting.Offset)
 			if gap > 0 {
-				log.Debugf("needAvoid: b1:%d, b2:%d, b3:%d, offset:%d, gap:%d", b1, b2, b3, c.setting.Offset, gap)
-				log.Debugf("needAvoid: %s ", drive.FmtCoord(cur, next, probePoint))
+				log.Infof("needAvoid: b1:%d, b2:%d, b3:%d, offset:%d, gap:%d", b1, b2, b3, c.setting.Offset, gap)
+				log.Infof("needAvoid: %s ", drive.FmtCoord(cur, next, probePoint))
 				avoidsMap[probePoint] = struct{}{}
 				isAgain = true
 			}
@@ -128,7 +128,7 @@ Again:
 		return nil, err
 	}
 	routePoints := route[0].Points
-	log.Debug("routes:", drive.FmtCoord(routePoints...))
+	log.Info("routes:", drive.FmtCoord(routePoints...))
 
 	for i := 0; i < len(routePoints)-1; i++ {
 		cur := routePoints[i]
@@ -142,10 +142,9 @@ Again:
 			_, b2, _ := geodist.VincentyDistance(geodist.Coord{Lat: cur.Lat, Lon: cur.Lon}, geodist.Coord{Lat: probePoint.Lat, Lon: probePoint.Lon})
 			_, b3, _ := geodist.VincentyDistance(geodist.Coord{Lat: probePoint.Lat, Lon: probePoint.Lon}, geodist.Coord{Lat: next.Lat, Lon: next.Lon})
 			gap := b1 - (b2 + b3 - (float64(c.setting.Offset) / 1000))
-
+			log.Infof("calculate: b1:%f, b2:%f, b3:%f, offset:%f, gap:%f", b1, b2, b3, float64(c.setting.Offset)/1000, gap)
 			if gap > 0 {
-				log.Debugf("needAvoid: b1:%f, b2:%f, b3:%f, offset:%f, gap:%f", b1, b2, b3, float64(c.setting.Offset)/1000, gap)
-				log.Debugf("needAvoid: %s ", drive.FmtCoord(cur, next, probePoint))
+				log.Infof("needAvoid: %s ", drive.FmtCoord(cur, next, probePoint))
 				avoidsMap[probePoint] = struct{}{}
 				isAgain = true
 			}
