@@ -10,14 +10,16 @@ import (
 	"github.com/mmfc-labs/driving-assistant/pkg/lbs/drive"
 	"github.com/mmfc-labs/driving-assistant/pkg/probe"
 	"github.com/mmfc-labs/driving-assistant/version"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	"github.com/swaggo/gin-swagger/swaggerFiles"
 	"net/http"
+	"reflect"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/mmfc-labs/driving-assistant/docs"
 	log "github.com/sirupsen/logrus"
-	ginSwagger "github.com/swaggo/gin-swagger"
-	"github.com/swaggo/gin-swagger/swaggerFiles"
 )
 
 type APIServer struct {
@@ -28,27 +30,26 @@ type APIServer struct {
 }
 
 func NewAPIServer(opt Options) *APIServer {
-	apiServer := &APIServer{
-		validate: validator.New(),
-	}
-
+	validate := validator.New()
+	validate.RegisterTagNameFunc(func(fld reflect.StructField) string {
+		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
+		if name == "-" {
+			return ""
+		}
+		return name
+	})
 	router := gin.Default()
-	router.GET("/api/healthz", func(c *gin.Context) {
-		c.String(200, "I'm fine")
-	})
-	router.GET("/api/version", func(c *gin.Context) {
-		c.JSON(200, gin.H{"version": version.Version, "gitRevision": version.GitRevision})
-	})
-	router.Use(HandleCors).GET("/api/route", apiServer.route)
-	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	srv := &http.Server{
 		Addr:    opt.Addr,
 		Handler: router,
 	}
 
-	apiServer.router = router
-	apiServer.srv = srv
+	apiServer := &APIServer{
+		router:   router,
+		srv:      srv,
+		validate: validate,
+	}
 
 	err := config.LoadConfig(opt.ConfigPath, func(setting config.Setting, probe probe.Probe) {
 		apiServer.calculator = lbs.NewCalculator(setting, probe)
@@ -59,7 +60,19 @@ func NewAPIServer(opt Options) *APIServer {
 		panic(err)
 	}
 
+	apiServer.registerAPI()
 	return apiServer
+}
+
+func (s *APIServer) registerAPI() {
+	s.router.GET("/api/healthz", func(c *gin.Context) {
+		c.String(200, "I'm fine")
+	})
+	s.router.GET("/api/version", func(c *gin.Context) {
+		c.JSON(200, gin.H{"version": version.Version, "gitRevision": version.GitRevision})
+	})
+	s.router.Use(HandleCors).GET("/api/route", s.route)
+	s.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 }
 
 func (s *APIServer) Stop() {
