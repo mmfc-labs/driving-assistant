@@ -1,0 +1,15 @@
+setting:
+  lbsKey: "KN6BZ-G526D-JAI4V-PGSJ2-6L5U6-YYFBV"
+  offset: 5  #路面距离计算偏移量，单位米
+  avoidAreaOffset: 0.000100 #生成四边形避让区偏移量, 单位经纬度
+  maxAvoid: 1 # 最大避让区
+  maxRoute: 15 # 最大路由规划次数
+
+probe:
+  points:
+    - lat: 22.57682
+      lon: 113.913137
+    - lat: 22.57759
+      lon: 113.914101
+    - lat: 22.576349
+      lon: 113.914133

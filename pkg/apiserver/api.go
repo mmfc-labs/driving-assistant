@@ -5,10 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-playground/validator/v10"
-	"github.com/mmfc-labs/driving-assistant/config"
+	"github.com/mmfc-labs/driving-assistant/pkg/config"
 	"github.com/mmfc-labs/driving-assistant/pkg/lbs"
 	"github.com/mmfc-labs/driving-assistant/pkg/lbs/drive"
-	"github.com/mmfc-labs/driving-assistant/pkg/lbs/drive/tencent"
+	"github.com/mmfc-labs/driving-assistant/pkg/probe"
 	"github.com/mmfc-labs/driving-assistant/version"
 	"net/http"
 	"time"
@@ -21,9 +21,10 @@ import (
 )
 
 type APIServer struct {
-	router   *gin.Engine
-	srv      *http.Server
-	validate *validator.Validate
+	router     *gin.Engine
+	srv        *http.Server
+	validate   *validator.Validate
+	calculator *lbs.Calculator
 }
 
 func NewAPIServer(opt Options) *APIServer {
@@ -48,6 +49,16 @@ func NewAPIServer(opt Options) *APIServer {
 
 	apiServer.router = router
 	apiServer.srv = srv
+
+	err := config.LoadConfig(opt.ConfigPath, func(setting config.Setting, probe probe.Probe) {
+		apiServer.calculator = lbs.NewCalculator(setting, probe)
+		log.Info("重新加载配置成功")
+	})
+
+	if err != nil {
+		panic(err)
+	}
+
 	return apiServer
 }
 
@@ -95,14 +106,14 @@ func (s *APIServer) avoids(c *gin.Context) {
 
 	// 起点，终点
 	from, to := drive.Coord{Lat: req.FromLat, Lon: req.FromLon}, drive.Coord{Lat: req.ToLat, Lon: req.ToLon}
-	calculator := lbs.NewCalculator(tencent.NewClient(config.TencentKey), config.Offset, config.AvoidAreaOffset)
 
 	//根据直线距离计算需要避让的探头
-	avoidPoints, err := calculator.AvoidProbeByLine(from, to)
+	avoidPoints, err := s.calculator.AvoidProbeByLine(from, to)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err)
+		Result(http.StatusInternalServerError, nil, err.Error(), c)
+		return
 	}
-	fmt.Println("根据直线距离计算需要避让的探头")
+	log.Info("根据直线距离计算需要避让的探头")
 	for key, _ := range avoidPoints {
 		fmt.Println(key)
 	}

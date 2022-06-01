@@ -1,0 +1,86 @@
+# Default values for driving-assistant.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# driving-assistant configuration. Specify content for config.yaml
+# ref: https://github.com/driving-assistant-labs/driving-assistant/blob/main/conf.sample.yml
+configuration: |-
+  setting:
+    lbsKey: "KN6BZ-G526D-JAI4V-PGSJ2-6L5U6-YYFBV"
+    offset: 5  #路面距离计算偏移量，单位米
+    avoidAreaOffset: 0.000100 #生成四边形避让区偏移量, 单位经纬度
+    maxAvoid: 1 # 最大避让区
+    maxRoute: 15 # 最大路由规划次数
+  
+  probe:
+    points:
+      - lat: 22.57682
+        lon: 113.913137
+      - lat: 22.57759
+        lon: 113.914101
+      - lat: 22.576349
+        lon: 113.914133
+
+
+# replicaCount Number of driving-assistant replicas to deploy
+replicaCount: 1
+
+# driving-assistant image version
+image:
+  repository: xyctruth/driving-assistant
+  tag: ""
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 200Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+service:
+  type: ClusterIP
+  ports:
+    http: 80
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+ingress:
+  enabled: true
+  className: ""
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-nginx
+  hosts:
+    - host: driving-assistant.jia-huang.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: driving-assistant-tls
+      hosts:
+        - driving-assistant.jia-huang.com
