@@ -60,4 +60,40 @@ paths:
       summary: 路线规划，获取需要避让的区域
       tags:
       - driving
+  /api/route_road:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - in: query
+        name: from_lat
+        required: true
+        type: number
+      - in: query
+        name: from_lon
+        required: true
+        type: number
+      - in: query
+        name: to_lat
+        required: true
+        type: number
+      - in: query
+        name: to_lon
+        required: true
+        type: number
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            allOf:
+            - $ref: '#/definitions/apiserver.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/apiserver.RouteResponse'
+              type: object
+      summary: 路线规划，获取需要避让的区域(根据路面距离计算,暂时废弃)
+      tags:
+      - driving
 swagger: "2.0"

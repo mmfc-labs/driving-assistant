@@ -7,10 +7,11 @@
 configuration: |-
   setting:
     lbsKey: "KN6BZ-G526D-JAI4V-PGSJ2-6L5U6-YYFBV"
-    offset: 6  #路面距离计算偏移量，单位米
+    roadOffset: 100  #直线距离计算偏移量，单位米 (废弃)
+    lineOffset: 6  #路面距离计算偏移量，单位米
     avoidAreaOffset: 0.000100 #生成四边形避让区偏移量, 单位经纬度
     maxAvoid: 32 # 最大避让区
-    maxRoute: 15 # 最大路由规划次数
+    maxRoute: 15 # 最大路线规划次数
   
   probe:
     points:
@@ -20,6 +21,12 @@ configuration: |-
         lon: 113.914101
       - lat: 22.576349
         lon: 113.914133
+      - lat: 22.576952
+        lon: 113.914656
+      - lat: 22.576974
+        lon: 113.914728
+
+
 
 
 # replicaCount Number of driving-assistant replicas to deploy

@@ -61,7 +61,8 @@ type Config struct {
 
 type Setting struct {
 	LBSKey          string  `yaml:"lbsKey"`
-	Offset          int     `yaml:"offset"`
+	RoadOffset      int     `yaml:"roadOffset"`
+	LineOffset      int     `yaml:"lineOffset"`
 	AvoidAreaOffset float64 `yaml:"avoidAreaOffset"`
 	MaxAvoid        int     `yaml:"maxAvoid"`
 	MaxRoute        int     `yaml:"maxRoute"`

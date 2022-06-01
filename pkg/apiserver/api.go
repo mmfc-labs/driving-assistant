@@ -53,7 +53,7 @@ func NewAPIServer(opt Options) *APIServer {
 
 	err := config.LoadConfig(opt.ConfigPath, func(setting config.Setting, probe probe.Probe) {
 		apiServer.calculator = lbs.NewCalculator(setting, probe)
-		log.Info("重新加载配置成功")
+		log.WithField("setting", setting).WithField("probe", probe).Info("重新加载配置成功")
 	})
 
 	if err != nil {
@@ -72,6 +72,7 @@ func (s *APIServer) registerAPI() {
 		c.JSON(200, gin.H{"version": version.Version, "gitRevision": version.GitRevision})
 	})
 	s.router.Use(HandleCors).GET("/api/route", s.route)
+	s.router.Use(HandleCors).GET("/api/route_road", s.routeByRoad)
 	s.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 }
 
@@ -122,6 +123,51 @@ func (s *APIServer) route(c *gin.Context) {
 
 	//根据直线距离计算需要避让的探头
 	avoidPoints, err := s.calculator.AvoidProbeByLine(from, to)
+	if err != nil {
+		Result(http.StatusInternalServerError, nil, err.Error(), c)
+		return
+	}
+	log.Info("根据直线距离计算需要避让的探头")
+	for key, _ := range avoidPoints {
+		fmt.Println(key)
+	}
+
+	avoidArea := make([][]drive.Coord, 0)
+	for a, _ := range avoidPoints {
+		avoidArea = append(avoidArea, drive.ConvCoordToAvoidArea(a, config.AvoidAreaOffset))
+	}
+
+	Result(http.StatusOK, RouteResponse{AvoidAreas: avoidArea}, "", c)
+}
+
+// route
+// @Tags driving
+// @Summary 路线规划，获取需要避让的区域(根据路面距离计算,暂时废弃)
+// @accept application/json
+// @Produce application/json
+// @Param data query RouteRequest true "RouteRequest"
+// @success 200 {object} Response{data=RouteResponse} "返回结果"
+// @Router /api/route_road [get]
+func (s *APIServer) routeByRoad(c *gin.Context) {
+	Result(http.StatusBadRequest, nil, "暂时废弃", c)
+	return
+	var (
+		req RouteRequest
+	)
+	if err := c.ShouldBindQuery(&req); err != nil {
+		Result(http.StatusBadRequest, nil, err.Error(), c)
+		return
+	}
+	if err := s.validate.Struct(req); err != nil {
+		Result(http.StatusBadRequest, nil, err.Error(), c)
+		return
+	}
+
+	// 起点，终点
+	from, to := drive.Coord{Lat: req.FromLat, Lon: req.FromLon}, drive.Coord{Lat: req.ToLat, Lon: req.ToLon}
+
+	//根据直线距离计算需要避让的探头
+	avoidPoints, err := s.calculator.AvoidProbeByRoad(from, to)
 	if err != nil {
 		Result(http.StatusInternalServerError, nil, err.Error(), c)
 		return
