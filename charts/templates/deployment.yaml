@@ -39,13 +39,13 @@ spec:
               name: http
           livenessProbe:
             httpGet:
-              path: /api/ping
-              port: 36789
+              path: /api/healthz
+              port: 80
               scheme: HTTP
           readinessProbe:
             httpGet:
-              path: /api/ping
-              port: 36789
+              path: /api/healthz
+              port: 80
               scheme: HTTP
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
