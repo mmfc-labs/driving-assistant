@@ -114,7 +114,7 @@ Retry:
 			"output":   "json",
 			"callback": "cb",
 			"key":      c.key,
-			"mode":     "walking",
+			"mode":     "driving",
 		}).
 		Get("/distance/v1/matrix")
 
