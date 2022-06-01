@@ -16,6 +16,58 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/probes": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "driving"
+                ],
+                "summary": "获取探头",
+                "parameters": [
+                    {
+                        "type": "number",
+                        "description": "获取附近多少公里的探头，0 为 所有",
+                        "name": "Near",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "name": "lat",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "name": "lon",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回结果",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/apiserver.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiserver.ProbeResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/api/route": {
             "get": {
                 "consumes": [
@@ -75,69 +127,20 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "/api/route_road": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "driving"
-                ],
-                "summary": "路线规划，获取需要避让的区域(根据路面距离计算,暂时废弃)",
-                "parameters": [
-                    {
-                        "type": "number",
-                        "name": "from_lat",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "number",
-                        "name": "from_lon",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "number",
-                        "name": "to_lat",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "number",
-                        "name": "to_lon",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "返回结果",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/apiserver.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/apiserver.RouteResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
         }
     },
     "definitions": {
+        "apiserver.ProbeResponse": {
+            "type": "object",
+            "properties": {
+                "probes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/drive.Coord"
+                    }
+                }
+            }
+        },
         "apiserver.Response": {
             "type": "object",
             "properties": {

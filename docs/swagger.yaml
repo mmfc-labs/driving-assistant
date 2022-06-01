@@ -1,4 +1,11 @@
 definitions:
+  apiserver.ProbeResponse:
+    properties:
+      probes:
+        items:
+          $ref: '#/definitions/drive.Coord'
+        type: array
+    type: object
   apiserver.Response:
     properties:
       data: {}
@@ -24,6 +31,36 @@ definitions:
 info:
   contact: {}
 paths:
+  /api/probes:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 获取附近多少公里的探头，0 为 所有
+        in: query
+        name: Near
+        type: number
+      - in: query
+        name: lat
+        type: number
+      - in: query
+        name: lon
+        type: number
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回结果
+          schema:
+            allOf:
+            - $ref: '#/definitions/apiserver.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/apiserver.ProbeResponse'
+              type: object
+      summary: 获取探头
+      tags:
+      - driving
   /api/route:
     get:
       consumes:
@@ -58,42 +95,6 @@ paths:
                   $ref: '#/definitions/apiserver.RouteResponse'
               type: object
       summary: 路线规划，获取需要避让的区域
-      tags:
-      - driving
-  /api/route_road:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - in: query
-        name: from_lat
-        required: true
-        type: number
-      - in: query
-        name: from_lon
-        required: true
-        type: number
-      - in: query
-        name: to_lat
-        required: true
-        type: number
-      - in: query
-        name: to_lon
-        required: true
-        type: number
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 返回结果
-          schema:
-            allOf:
-            - $ref: '#/definitions/apiserver.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/apiserver.RouteResponse'
-              type: object
-      summary: 路线规划，获取需要避让的区域(根据路面距离计算,暂时废弃)
       tags:
       - driving
 swagger: "2.0"
