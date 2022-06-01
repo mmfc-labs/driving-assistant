@@ -3,26 +3,27 @@ package lbs
 import (
 	"fmt"
 	"github.com/jftuga/geodist"
+	"github.com/mmfc-labs/driving-assistant/pkg/config"
 	"github.com/mmfc-labs/driving-assistant/pkg/lbs/drive"
+	"github.com/mmfc-labs/driving-assistant/pkg/lbs/drive/tencent"
+	"github.com/mmfc-labs/driving-assistant/pkg/probe"
+	log "github.com/sirupsen/logrus"
 	"github.com/xyctruth/stream"
 )
 
 // Calculator 根据路面距离计算需要避让的探头
 type Calculator struct {
-	client          drive.Client
-	offset          int     // 路面距离计算偏移量，单位米
-	avoidAreaOffset float64 // 生成四边形避让区偏移量, 单位经纬度
+	client  drive.Client
+	setting config.Setting
+	probe   probe.Probe
 }
 
 // NewCalculator
-// client lbs client
-// offset 路面距离计算偏移量，单位米
-// avoidAreaOffset 生成四边形避让区偏移量, 单位经纬度
-func NewCalculator(client drive.Client, offset int, avoidAreaOffset float64) *Calculator {
+func NewCalculator(setting config.Setting, probe probe.Probe) *Calculator {
 	c := &Calculator{
-		client:          client,
-		offset:          offset,
-		avoidAreaOffset: avoidAreaOffset,
+		client:  tencent.NewClient(config.TencentKey),
+		setting: setting,
+		probe:   probe,
 	}
 	return c
 }
@@ -45,6 +46,9 @@ func (c *Calculator) AvoidProbeByRoad(from, to drive.Coord) (map[drive.Coord]str
 
 Again:
 	count++
+	if count > c.setting.MaxRoute {
+		return nil, fmt.Errorf("超出最大路线规划次数:%d", c.setting.MaxRoute)
+	}
 	avoids := make([]drive.Coord, 0, len(avoidsMap))
 	isAgain := false
 
@@ -52,12 +56,12 @@ Again:
 		avoids = append(avoids, coord)
 	}
 
-	route, err := c.client.GetRoutes(from, to, avoids, c.avoidAreaOffset)
+	route, err := c.client.GetRoutes(from, to, avoids, c.setting.AvoidAreaOffset)
 	if err != nil {
 		return nil, err
 	}
 	routePoints := route[0].Points
-	fmt.Println(drive.FmtCoord(routePoints...))
+	log.Debug("routes:", drive.FmtCoord(routePoints...))
 	// 需要避让的区域
 
 	for i := 0; i < len(routePoints)-1; i++ {
@@ -65,7 +69,7 @@ Again:
 		next := routePoints[i+1]
 
 		// 获取附近 5km 的探头
-		probePoints := G_Probe.Near(cur, 5)
+		probePoints := c.probe.Near(cur, 5)
 		if len(probePoints) == 0 {
 			continue
 		}
@@ -85,20 +89,20 @@ Again:
 			b1 := curToNextAndProbes[0]
 			b2 := curToNextAndProbes[i+1]
 			b3 := probesToNext[i]
-			gap := b1 - (b2 + b3 - c.offset)
+			gap := b1 - (b2 + b3 - c.setting.Offset)
 			if gap > 0 {
-				fmt.Printf("needAvoid: %s  \n", drive.FmtCoord(cur, next, probePoint))
-				fmt.Printf("needAvoid: b1:%d, b2:%d, b3:%d, offset:%d, gap:%d \n", b1, b2, b3, c.offset, gap)
+				log.Debugf("needAvoid: b1:%d, b2:%d, b3:%d, offset:%d, gap:%d", b1, b2, b3, c.setting.Offset, gap)
+				log.Debugf("needAvoid: %s ", drive.FmtCoord(cur, next, probePoint))
 				avoidsMap[probePoint] = struct{}{}
 				isAgain = true
 			}
 		})
 	}
 	if isAgain {
-		fmt.Println("again")
+		log.Info("again")
 		goto Again
 	}
-	fmt.Println("执行次数：", count)
+	log.Info("执行次数：", count)
 	return avoidsMap, nil
 }
 
@@ -108,6 +112,10 @@ func (c *Calculator) AvoidProbeByLine(from, to drive.Coord) (map[drive.Coord]str
 	count := 0
 Again:
 	count++
+	if count > c.setting.MaxRoute {
+		return nil, fmt.Errorf("超出最大路线规划次数:%d", c.setting.MaxRoute)
+	}
+
 	avoids := make([]drive.Coord, 0, len(avoidsMap))
 	isAgain := false
 
@@ -115,17 +123,17 @@ Again:
 		avoids = append(avoids, coord)
 	}
 
-	route, err := c.client.GetRoutes(from, to, avoids, c.avoidAreaOffset)
+	route, err := c.client.GetRoutes(from, to, avoids, c.setting.AvoidAreaOffset)
 	if err != nil {
 		return nil, err
 	}
 	routePoints := route[0].Points
-	fmt.Println("路线规划,坐标串:", drive.FmtCoord(routePoints...))
+	log.Debug("routes:", drive.FmtCoord(routePoints...))
 
 	for i := 0; i < len(routePoints)-1; i++ {
 		cur := routePoints[i]
 		next := routePoints[i+1]
-		probePoints := G_Probe.Near(cur, 5)
+		probePoints := c.probe.Near(cur, 5)
 		if len(probePoints) == 0 {
 			continue
 		}
@@ -133,19 +141,24 @@ Again:
 			_, b1, _ := geodist.VincentyDistance(geodist.Coord{Lat: cur.Lat, Lon: cur.Lon}, geodist.Coord{Lat: next.Lat, Lon: next.Lon})
 			_, b2, _ := geodist.VincentyDistance(geodist.Coord{Lat: cur.Lat, Lon: cur.Lon}, geodist.Coord{Lat: probePoint.Lat, Lon: probePoint.Lon})
 			_, b3, _ := geodist.VincentyDistance(geodist.Coord{Lat: probePoint.Lat, Lon: probePoint.Lon}, geodist.Coord{Lat: next.Lat, Lon: next.Lon})
-			gap := b1 - (b2 + b3 - (float64(c.offset) / 1000))
-			fmt.Printf("Debug: %s  \n", drive.FmtCoord(cur, next, probePoint))
-			fmt.Printf("Debug: b1:%f, b2:%f, b3:%f, offset:%d, gap:%f  \n", b1, b2, b3, c.offset, gap)
+			gap := b1 - (b2 + b3 - (float64(c.setting.Offset) / 1000))
+
 			if gap > 0 {
+				log.Debugf("needAvoid: b1:%f, b2:%f, b3:%f, offset:%f, gap:%f", b1, b2, b3, float64(c.setting.Offset)/1000, gap)
+				log.Debugf("needAvoid: %s ", drive.FmtCoord(cur, next, probePoint))
 				avoidsMap[probePoint] = struct{}{}
 				isAgain = true
 			}
 		})
 	}
 	if isAgain {
-		fmt.Println("again")
+		log.Info("again")
 		goto Again
 	}
-	fmt.Println("执行次数：", count)
+	if len(avoidsMap) > c.setting.MaxAvoid {
+		return nil, fmt.Errorf("超出最大避让点：CurAvoid:%d MaxAvoid:%d", len(avoidsMap), c.setting.MaxAvoid)
+	}
+
+	log.Info("执行次数：", count)
 	return avoidsMap, nil
 }

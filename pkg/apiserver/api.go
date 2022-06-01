@@ -5,10 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-playground/validator/v10"
-	"github.com/mmfc-labs/driving-assistant/config"
+	"github.com/mmfc-labs/driving-assistant/pkg/config"
 	"github.com/mmfc-labs/driving-assistant/pkg/lbs"
 	"github.com/mmfc-labs/driving-assistant/pkg/lbs/drive"
-	"github.com/mmfc-labs/driving-assistant/pkg/lbs/drive/tencent"
+	"github.com/mmfc-labs/driving-assistant/pkg/probe"
 	"github.com/mmfc-labs/driving-assistant/version"
 	"net/http"
 	"time"
@@ -21,9 +21,10 @@ import (
 )
 
 type APIServer struct {
-	router   *gin.Engine
-	srv      *http.Server
-	validate *validator.Validate
+	router     *gin.Engine
+	srv        *http.Server
+	validate   *validator.Validate
+	calculator *lbs.Calculator
 }
 
 func NewAPIServer(opt Options) *APIServer {
@@ -38,7 +39,7 @@ func NewAPIServer(opt Options) *APIServer {
 	router.GET("/api/version", func(c *gin.Context) {
 		c.JSON(200, gin.H{"version": version.Version, "gitRevision": version.GitRevision})
 	})
-	router.Use(HandleCors).GET("/api/avoids", apiServer.avoids)
+	router.Use(HandleCors).GET("/api/route", apiServer.route)
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	srv := &http.Server{
@@ -48,6 +49,16 @@ func NewAPIServer(opt Options) *APIServer {
 
 	apiServer.router = router
 	apiServer.srv = srv
+
+	err := config.LoadConfig(opt.ConfigPath, func(setting config.Setting, probe probe.Probe) {
+		apiServer.calculator = lbs.NewCalculator(setting, probe)
+		log.Info("重新加载配置成功")
+	})
+
+	if err != nil {
+		panic(err)
+	}
+
 	return apiServer
 }
 
@@ -72,17 +83,17 @@ func (s *APIServer) Run() {
 	}()
 }
 
-// avoids
+// route
 // @Tags driving
-// @Summary 修改渠道用户
+// @Summary 路线规划，获取需要避让的区域
 // @accept application/json
 // @Produce application/json
-// @Param data query AvoidsRequest true "AvoidsRequest"
-// @success 200 {object} Response{data=[][]drive.Coord} "返回结果"
-// @Router /api/avoids [get]
-func (s *APIServer) avoids(c *gin.Context) {
+// @Param data query RouteRequest true "RouteRequest"
+// @success 200 {object} Response{data=RouteResponse} "返回结果"
+// @Router /api/route [get]
+func (s *APIServer) route(c *gin.Context) {
 	var (
-		req AvoidsRequest
+		req RouteRequest
 	)
 	if err := c.ShouldBindQuery(&req); err != nil {
 		Result(http.StatusBadRequest, nil, err.Error(), c)
@@ -95,14 +106,14 @@ func (s *APIServer) avoids(c *gin.Context) {
 
 	// 起点，终点
 	from, to := drive.Coord{Lat: req.FromLat, Lon: req.FromLon}, drive.Coord{Lat: req.ToLat, Lon: req.ToLon}
-	calculator := lbs.NewCalculator(tencent.NewClient(config.TencentKey), config.Offset, config.AvoidAreaOffset)
 
 	//根据直线距离计算需要避让的探头
-	avoidPoints, err := calculator.AvoidProbeByLine(from, to)
+	avoidPoints, err := s.calculator.AvoidProbeByLine(from, to)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err)
+		Result(http.StatusInternalServerError, nil, err.Error(), c)
+		return
 	}
-	fmt.Println("根据直线距离计算需要避让的探头")
+	log.Info("根据直线距离计算需要避让的探头")
 	for key, _ := range avoidPoints {
 		fmt.Println(key)
 	}
@@ -111,14 +122,19 @@ func (s *APIServer) avoids(c *gin.Context) {
 	for a, _ := range avoidPoints {
 		avoidArea = append(avoidArea, drive.ConvCoordToAvoidArea(a, config.AvoidAreaOffset))
 	}
-	Result(http.StatusOK, avoidArea, "", c)
+
+	Result(http.StatusOK, RouteResponse{AvoidAreas: avoidArea}, "", c)
 }
 
-type AvoidsRequest struct {
+type RouteRequest struct {
 	FromLat float64 `form:"from_lat" json:"from_lat" validate:"required"`
 	FromLon float64 `form:"from_lon" json:"from_lon" validate:"required"`
 	ToLat   float64 `form:"to_lat" json:"to_lat" validate:"required"`
 	ToLon   float64 `form:"to_lon" json:"to_lon" validate:"required" label:"to_lon"`
+}
+
+type RouteResponse struct {
+	AvoidAreas [][]drive.Coord `json:"avoid_areas"`
 }
 
 func Result(httpStatus int, data interface{}, errorMsg string, c *gin.Context) {
@@ -132,8 +148,4 @@ func Result(httpStatus int, data interface{}, errorMsg string, c *gin.Context) {
 type Response struct {
 	Data     interface{} `json:"data"`
 	ErrorMsg string      `json:"error_msg"`
-}
-
-type AvoidsResponse struct {
-	AvoidArea [][]drive.Coord
 }

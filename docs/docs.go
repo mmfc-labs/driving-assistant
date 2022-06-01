@@ -16,7 +16,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/avoids": {
+        "/api/route": {
             "get": {
                 "consumes": [
                     "application/json"
@@ -27,7 +27,7 @@ const docTemplate = `{
                 "tags": [
                     "driving"
                 ],
-                "summary": "修改渠道用户",
+                "summary": "路线规划，获取需要避让的区域",
                 "parameters": [
                     {
                         "type": "number",
@@ -66,13 +66,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "array",
-                                                "items": {
-                                                    "$ref": "#/definitions/drive.Coord"
-                                                }
-                                            }
+                                            "$ref": "#/definitions/apiserver.RouteResponse"
                                         }
                                     }
                                 }
@@ -90,6 +84,20 @@ const docTemplate = `{
                 "data": {},
                 "error_msg": {
                     "type": "string"
+                }
+            }
+        },
+        "apiserver.RouteResponse": {
+            "type": "object",
+            "properties": {
+                "avoid_areas": {
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/drive.Coord"
+                        }
+                    }
                 }
             }
         },

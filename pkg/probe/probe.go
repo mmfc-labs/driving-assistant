@@ -1,43 +1,10 @@
-package lbs
+package probe
 
 import (
-	"encoding/json"
 	"github.com/jftuga/geodist"
 	"github.com/mmfc-labs/driving-assistant/pkg/lbs/drive"
 	"github.com/xyctruth/stream"
 )
-
-var (
-	G_Probe *Probe
-)
-
-func init() {
-	G_Probe = &Probe{}
-	probeJson := `
-{
-  "points":[
-    {
-      "lat": 22.57682,
-      "lon": 113.913137
-    },
-    {
-      "lat": 22.57759,
-      "lon": 113.914101
-    },
-    {
-      "lat": 23.576349,
-      "lon": 114.914133
-    }
-  ]
-}
-
-`
-
-	err := json.Unmarshal([]byte(probeJson), G_Probe)
-	if err != nil {
-		panic(err)
-	}
-}
 
 type Probe struct {
 	Points []drive.Coord
