@@ -45,10 +45,10 @@ func (c *Calculator) AvoidProbe(from, to drive.Coord) (probesMap map[drive.Coord
 
 	probesMap = make(map[drive.Coord]struct{}, 0)
 	debug = &apis.DebugResp{}
-	debug.Routes = make([]apis.DebugRouteResp, 0)
+	debug.RouteLogs = make([]apis.DebugLogsResp, 0)
 	count := 0
 Again:
-	debugRoute := apis.DebugRouteResp{}
+	debugLog := apis.DebugLogsResp{}
 
 	count++
 	if count > c.setting.MaxRoute {
@@ -69,8 +69,8 @@ Again:
 	routePoints := route[0].Points
 	routeInfo := fmt.Sprintf("第%d次路线:%s", count, drive.FmtCoord(routePoints...))
 	logEntry.Info(routeInfo)
-	debugRoute.RouteInfo = routeInfo
-	debugRoute.RouteProbeInfo = fmt.Sprintf("第%d次路线,传入的探头:%s", count, drive.FmtCoord(probes...))
+	debugLog.RouteInfo = routeInfo
+	debugLog.RouteProbeInfo = fmt.Sprintf("第%d次路线,传入的探头:%s", count, drive.FmtCoord(probes...))
 
 	debugCurToNextToProbe := make([]string, 0)
 	for i := 0; i < len(routePoints)-1; i++ {
@@ -96,8 +96,8 @@ Again:
 		})
 	}
 
-	debugRoute.CurToNextToProbe = debugCurToNextToProbe
-	debug.Routes = append(debug.Routes, debugRoute)
+	debugLog.CurToNextToProbe = debugCurToNextToProbe
+	debug.RouteLogs = append(debug.RouteLogs, debugLog)
 	debug.ProbeCount = len(probesMap)
 	debug.RouteCount = count
 	if isAgain {
