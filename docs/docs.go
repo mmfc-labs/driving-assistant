@@ -31,18 +31,20 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "number",
-                        "description": "获取附近多少公里的探头，0 为 所有",
-                        "name": "Near",
-                        "in": "query"
-                    },
-                    {
-                        "type": "number",
+                        "description": "当前位置经度",
                         "name": "lat",
                         "in": "query"
                     },
                     {
                         "type": "number",
+                        "description": "当前位置纬度",
                         "name": "lon",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "获取附近多少公里的探头，0为获取所有探头",
+                        "name": "near",
                         "in": "query"
                     }
                 ],
@@ -58,7 +60,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/apiserver.ProbeResponse"
+                                            "$ref": "#/definitions/apis.ProbeResp"
                                         }
                                     }
                                 }
@@ -118,7 +120,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/apiserver.RouteResponse"
+                                            "$ref": "#/definitions/apis.RouteResp"
                                         }
                                     }
                                 }
@@ -130,7 +132,44 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "apiserver.ProbeResponse": {
+        "apis.DebugResp": {
+            "type": "object",
+            "properties": {
+                "probe_count": {
+                    "type": "integer"
+                },
+                "route_count": {
+                    "type": "integer"
+                },
+                "routes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/apis.DebugRouteResp"
+                    }
+                }
+            }
+        },
+        "apis.DebugRouteResp": {
+            "type": "object",
+            "properties": {
+                "cur_to_next_to_probe": {
+                    "description": "本次计算后需要避让的探头，格式为：cur;next;probe (A1;A2;探头)",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "route_info": {
+                    "description": "本次路线信息",
+                    "type": "string"
+                },
+                "route_probe_info": {
+                    "description": "本次路线信息传入的避让探头, 第一次传入的为空",
+                    "type": "string"
+                }
+            }
+        },
+        "apis.ProbeResp": {
             "type": "object",
             "properties": {
                 "probes": {
@@ -141,16 +180,7 @@ const docTemplate = `{
                 }
             }
         },
-        "apiserver.Response": {
-            "type": "object",
-            "properties": {
-                "data": {},
-                "error_msg": {
-                    "type": "string"
-                }
-            }
-        },
-        "apiserver.RouteResponse": {
+        "apis.RouteResp": {
             "type": "object",
             "properties": {
                 "avoid_areas": {
@@ -161,6 +191,18 @@ const docTemplate = `{
                             "$ref": "#/definitions/drive.Coord"
                         }
                     }
+                },
+                "debug": {
+                    "$ref": "#/definitions/apis.DebugResp"
+                }
+            }
+        },
+        "apiserver.Response": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "error_msg": {
+                    "type": "string"
                 }
             }
         },
