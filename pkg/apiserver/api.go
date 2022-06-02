@@ -1,12 +1,9 @@
 package apiserver
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/mmfc-labs/driving-assistant/pkg/apis"
-	"github.com/mmfc-labs/driving-assistant/pkg/config"
 	"github.com/mmfc-labs/driving-assistant/pkg/lbs/drive"
-	log "github.com/sirupsen/logrus"
 	"net/http"
 )
 
@@ -33,24 +30,13 @@ func (s *APIServer) route(c *gin.Context) {
 
 	// 起点，终点
 	from, to := drive.Coord{Lat: req.FromLat, Lon: req.FromLon}, drive.Coord{Lat: req.ToLat, Lon: req.ToLon}
-
 	//根据直线距离计算需要避让的探头
-	avoidPoints, debug, err := s.calculator.AvoidProbe(from, to)
+	avoidAreas, debug, err := s.lbs.Route(from, to)
 	if err != nil {
-		Result(http.StatusInternalServerError, nil, err.Error(), c)
+		Result(http.StatusInternalServerError, apis.RouteResp{Debug: debug}, err.Error(), c)
 		return
 	}
-	log.Info("根据直线距离计算需要避让的探头")
-	for key, _ := range avoidPoints {
-		fmt.Println(key)
-	}
-
-	avoidArea := make([][]drive.Coord, 0)
-	for a, _ := range avoidPoints {
-		avoidArea = append(avoidArea, drive.ConvCoordToAvoidArea(a, config.AvoidAreaOffset))
-	}
-
-	Result(http.StatusOK, apis.RouteResp{AvoidAreas: avoidArea, Debug: debug}, "", c)
+	Result(http.StatusOK, apis.RouteResp{AvoidAreas: avoidAreas, Debug: debug}, "", c)
 }
 
 // probes
@@ -73,7 +59,7 @@ func (s *APIServer) probes(c *gin.Context) {
 		Result(http.StatusBadRequest, nil, err.Error(), c)
 		return
 	}
-	probes, err := s.calculator.Probes(drive.Coord{Lat: req.Lat, Lon: req.Lon}, req.Near)
+	probes, err := s.lbs.Probes(drive.Coord{Lat: req.Lat, Lon: req.Lon}, req.Near)
 	if err != nil {
 		Result(http.StatusInternalServerError, nil, err.Error(), c)
 		return

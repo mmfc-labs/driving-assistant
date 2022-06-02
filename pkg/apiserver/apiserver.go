@@ -21,10 +21,10 @@ import (
 )
 
 type APIServer struct {
-	router     *gin.Engine
-	srv        *http.Server
-	validate   *validator.Validate
-	calculator *lbs.Calculator
+	router   *gin.Engine
+	srv      *http.Server
+	validate *validator.Validate
+	lbs      *lbs.LBS
 }
 
 func NewAPIServer(opt Options) *APIServer {
@@ -50,7 +50,7 @@ func NewAPIServer(opt Options) *APIServer {
 	}
 
 	err := config.LoadConfig(opt.ConfigPath, func(setting config.Setting, probe probe.Probe) {
-		apiServer.calculator = lbs.NewCalculator(setting, probe)
+		apiServer.lbs = lbs.NewLBS(setting, probe)
 		log.WithField("setting", setting).WithField("probe", probe).Info("重新加载配置成功")
 	})
 
@@ -76,9 +76,9 @@ func (s *APIServer) registerAPI() {
 	s.router.GET("/api/version", func(c *gin.Context) {
 		c.JSON(200, gin.H{"version": version.Version, "gitRevision": version.GitRevision})
 	})
+	s.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	s.router.Use(HandleCors).GET("/api/route", s.route)
 	s.router.Use(HandleCors).GET("/api/probes", s.probes)
-	s.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 }
 
 func (s *APIServer) Stop() {
@@ -111,6 +111,6 @@ func Result(httpStatus int, data interface{}, errorMsg string, c *gin.Context) {
 }
 
 type Response struct {
-	Data     interface{} `json:"data"`
-	ErrorMsg string      `json:"error_msg"`
+	Data  interface{} `json:"data"`
+	Error string      `json:"error"`
 }
