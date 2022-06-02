@@ -63,6 +63,13 @@ func NewAPIServer(opt Options) *APIServer {
 }
 
 func (s *APIServer) registerAPI() {
+	s.router.LoadHTMLGlob("./templates/*")
+	s.router.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "coord.html", gin.H{
+			"title": "coord",
+		})
+	})
+
 	s.router.GET("/api/healthz", func(c *gin.Context) {
 		c.String(200, "I'm fine")
 	})

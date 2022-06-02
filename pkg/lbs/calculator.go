@@ -3,6 +3,7 @@ package lbs
 import (
 	"fmt"
 	"github.com/jftuga/geodist"
+	"github.com/mmfc-labs/driving-assistant/pkg/apis"
 	"github.com/mmfc-labs/driving-assistant/pkg/config"
 	"github.com/mmfc-labs/driving-assistant/pkg/lbs/drive"
 	"github.com/mmfc-labs/driving-assistant/pkg/lbs/drive/tencent"
@@ -39,31 +40,39 @@ func NewCalculator(setting config.Setting, probe probe.Probe) *Calculator {
 //探头1 -> A2 直线距离 B3
 //
 //B1 >= B2+B3 即路过探头
-func (c *Calculator) AvoidProbe(from, to drive.Coord) (map[drive.Coord]struct{}, error) {
+func (c *Calculator) AvoidProbe(from, to drive.Coord) (probesMap map[drive.Coord]struct{}, debug *apis.DebugResp, err error) {
 	logEntry := log.WithField("route", "AvoidProbe")
 
-	avoidsMap := make(map[drive.Coord]struct{}, 0)
+	probesMap = make(map[drive.Coord]struct{}, 0)
+	debug = &apis.DebugResp{}
+	debug.Routes = make([]apis.DebugRouteResp, 0)
 	count := 0
 Again:
+	debugRoute := apis.DebugRouteResp{}
+
 	count++
 	if count > c.setting.MaxRoute {
-		return nil, fmt.Errorf("超出最大路线规划次数:%d", c.setting.MaxRoute)
+		return probesMap, debug, fmt.Errorf("超出最大路线规划次数:%d", c.setting.MaxRoute)
 	}
 
-	avoids := make([]drive.Coord, 0, len(avoidsMap))
+	probes := make([]drive.Coord, 0, len(probesMap))
 	isAgain := false
 
-	for coord, _ := range avoidsMap {
-		avoids = append(avoids, coord)
+	for coord, _ := range probesMap {
+		probes = append(probes, coord)
 	}
 
-	route, err := c.client.GetRoutes(from, to, avoids, c.setting.AvoidAreaOffset)
+	route, err := c.client.GetRoutes(from, to, probes, c.setting.AvoidAreaOffset)
 	if err != nil {
-		return nil, err
+		return probesMap, debug, err
 	}
 	routePoints := route[0].Points
-	logEntry.Info("routes:", drive.FmtCoord(routePoints...))
+	routeInfo := fmt.Sprintf("第%d次路线:%s", count, drive.FmtCoord(routePoints...))
+	logEntry.Info(routeInfo)
+	debugRoute.RouteInfo = routeInfo
+	debugRoute.RouteProbeInfo = fmt.Sprintf("第%d次路线,传入的探头:%s", count, drive.FmtCoord(probes...))
 
+	debugCurToNextToProbe := make([]string, 0)
 	for i := 0; i < len(routePoints)-1; i++ {
 		cur := routePoints[i]
 		next := routePoints[i+1]
@@ -78,22 +87,29 @@ Again:
 			gap := b1 - (b2 + b3 - (float64(c.setting.Offset) / 1000))
 			logEntry.Infof("calculate: b1:%f, b2:%f, b3:%f, offset:%f, gap:%f", b1, b2, b3, float64(c.setting.Offset)/1000, gap)
 			if gap > 0 {
-				logEntry.Infof("needAvoid: %s ", drive.FmtCoord(cur, next, probePoint))
-				avoidsMap[probePoint] = struct{}{}
+				curToNextToProbeInfo := fmt.Sprintf("needAvoid,fmt(cur;next;probe): %s", drive.FmtCoord(cur, next, probePoint))
+				logEntry.Info(curToNextToProbeInfo)
+				debugCurToNextToProbe = append(debugCurToNextToProbe, curToNextToProbeInfo)
+				probesMap[probePoint] = struct{}{}
 				isAgain = true
 			}
 		})
 	}
+
+	debugRoute.CurToNextToProbe = debugCurToNextToProbe
+	debug.Routes = append(debug.Routes, debugRoute)
+	debug.ProbeCount = len(probesMap)
+	debug.RouteCount = count
 	if isAgain {
 		logEntry.Info("again,count:", count)
 		goto Again
 	}
-	if len(avoidsMap) > c.setting.MaxAvoid {
-		return nil, fmt.Errorf("超出最大避让点：CurAvoid:%d MaxAvoid:%d", len(avoidsMap), c.setting.MaxAvoid)
+	if len(probesMap) > c.setting.MaxAvoid {
+		return probesMap, debug, fmt.Errorf("超出最大避让点：CurAvoid:%d MaxAvoid:%d", len(probesMap), c.setting.MaxAvoid)
 	}
 
 	logEntry.Info("执行次数：", count)
-	return avoidsMap, nil
+	return probesMap, debug, nil
 }
 
 func (c *Calculator) Probes(cur drive.Coord, near float64) ([]drive.Coord, error) {
