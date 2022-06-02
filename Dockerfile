@@ -16,6 +16,7 @@ WORKDIR /driving-assistant
 # server
 COPY --from=builder /workspace/driving-assistant .
 COPY config.yaml ./config.yaml
+COPY ./templates ./templates
 
 EXPOSE 80 80
 
