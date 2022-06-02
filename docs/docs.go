@@ -132,24 +132,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "apis.DebugResp": {
-            "type": "object",
-            "properties": {
-                "probe_count": {
-                    "type": "integer"
-                },
-                "route_count": {
-                    "type": "integer"
-                },
-                "routes": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/apis.DebugRouteResp"
-                    }
-                }
-            }
-        },
-        "apis.DebugRouteResp": {
+        "apis.DebugLogsResp": {
             "type": "object",
             "properties": {
                 "cur_to_next_to_probe": {
@@ -166,6 +149,26 @@ const docTemplate = `{
                 "route_probe_info": {
                     "description": "本次路线信息传入的避让探头, 第一次传入的为空",
                     "type": "string"
+                }
+            }
+        },
+        "apis.DebugResp": {
+            "type": "object",
+            "properties": {
+                "probe_count": {
+                    "description": "需要避让的探头数量",
+                    "type": "integer"
+                },
+                "route_count": {
+                    "description": "路线规划次数",
+                    "type": "integer"
+                },
+                "route_logs": {
+                    "description": "路线规划日志",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/apis.DebugLogsResp"
+                    }
                 }
             }
         },

@@ -15,12 +15,12 @@ type RouteResp struct {
 }
 
 type DebugResp struct {
-	RouteCount int              `json:"route_count"`
-	ProbeCount int              `json:"probe_count"`
-	Routes     []DebugRouteResp `json:"routes"`
+	RouteCount int             `json:"route_count"` // 路线规划次数
+	ProbeCount int             `json:"probe_count"` // 需要避让的探头数量
+	RouteLogs  []DebugLogsResp `json:"route_logs"`  // 路线规划日志
 }
 
-type DebugRouteResp struct {
+type DebugLogsResp struct {
 	RouteInfo        string   `json:"route_info"`           //本次路线信息
 	RouteProbeInfo   string   `json:"route_probe_info"`     //本次路线信息传入的避让探头, 第一次传入的为空
 	CurToNextToProbe []string `json:"cur_to_next_to_probe"` //本次计算后需要避让的探头，格式为：cur;next;probe (A1;A2;探头)
