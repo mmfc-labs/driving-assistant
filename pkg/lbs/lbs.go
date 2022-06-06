@@ -22,7 +22,7 @@ type LBS struct {
 // NewLBS
 func NewLBS(setting config.Setting, probeManager probe.ProbeManager) *LBS {
 	c := &LBS{
-		client:       tencent.NewClient(config.TencentKey),
+		client:       tencent.NewClient(setting.LBSKey),
 		setting:      setting,
 		probeManager: probeManager,
 	}
@@ -101,7 +101,7 @@ Again:
 
 	avoidAreas = make([][]drive.Coord, 0)
 	for a := range probesMap {
-		avoidAreas = append(avoidAreas, drive.ConvCoordToAvoidArea(a, config.AvoidAreaOffset))
+		avoidAreas = append(avoidAreas, drive.ConvCoordToAvoidArea(a, c.setting.AvoidAreaOffset))
 	}
 	log.WithField("avoidPoints", probesMap).WithField("count", count).Info("根据直线距离计算需要避让的探头")
 	return avoidAreas, debug, nil
@@ -125,7 +125,7 @@ func (c *LBS) isAvoid(cur drive.Coord, next drive.Coord, probePoint probe.Probe)
 	for _, toward := range probePoint.Towards {
 		aBearingTo := cur.GeoPoint().BearingTo(toward.GeoPoint())
 		pBearingTo := probePoint.GeoPoint().BearingTo(toward.GeoPoint())
-		if math.Abs(aBearingTo-pBearingTo) < 90 || math.Abs(360-aBearingTo-pBearingTo) < 90 {
+		if math.Abs(aBearingTo-pBearingTo) < c.setting.TowardRange || math.Abs(360-aBearingTo-pBearingTo) < c.setting.TowardRange {
 			return true
 		}
 	}
