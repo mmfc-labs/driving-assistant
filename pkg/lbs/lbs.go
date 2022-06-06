@@ -122,8 +122,8 @@ func (c *LBS) isAvoid(cur drive.Coord, next drive.Coord, probePoint probe.Probe)
 		return true
 	}
 
+	toward1 := cur.GeoPoint().BearingTo(next.GeoPoint())
 	for _, toward := range probePoint.Towards {
-		toward1 := cur.GeoPoint().BearingTo(toward.GeoPoint())
 		toward2 := probePoint.GeoPoint().BearingTo(toward.GeoPoint())
 		towardGap := math.Abs(toward1 - toward2)
 		if towardGap < c.setting.TowardRange || 360-towardGap < c.setting.TowardRange {
