@@ -2,7 +2,6 @@ package lbs
 
 import (
 	"fmt"
-	"github.com/jftuga/geodist"
 	"github.com/mmfc-labs/driving-assistant/pkg/apis"
 	"github.com/mmfc-labs/driving-assistant/pkg/config"
 	"github.com/mmfc-labs/driving-assistant/pkg/lbs/drive"
@@ -10,21 +9,22 @@ import (
 	"github.com/mmfc-labs/driving-assistant/pkg/probe"
 	log "github.com/sirupsen/logrus"
 	"github.com/xyctruth/stream"
+	"math"
 )
 
 // LBS 根据路面距离计算需要避让的探头
 type LBS struct {
-	client  drive.Client
-	setting config.Setting
-	probe   probe.Probe
+	client       drive.Client
+	setting      config.Setting
+	probeManager probe.ProbeManager
 }
 
 // NewLBS
-func NewLBS(setting config.Setting, probe probe.Probe) *LBS {
+func NewLBS(setting config.Setting, probeManager probe.ProbeManager) *LBS {
 	c := &LBS{
-		client:  tencent.NewClient(config.TencentKey),
-		setting: setting,
-		probe:   probe,
+		client:       tencent.NewClient(config.TencentKey),
+		setting:      setting,
+		probeManager: probeManager,
 	}
 	return c
 }
@@ -73,16 +73,16 @@ Again:
 	for i := 0; i < len(routePoints)-1; i++ {
 		cur := routePoints[i]
 		next := routePoints[i+1]
-		probePoints := c.probe.Near(cur, 5)
+		probePoints := c.probeManager.Near(cur, 5)
 		if len(probePoints) == 0 {
 			continue
 		}
-		stream.NewSlice(probePoints).ForEach(func(_ int, probePoint drive.Coord) {
+		stream.NewSlice(probePoints).ForEach(func(_ int, probePoint probe.Probe) {
 			if c.isAvoid(cur, next, probePoint) {
-				curToNextToProbeInfo := fmt.Sprintf("needAvoid,fmt(cur;next;probe): %s", drive.FmtCoord(cur, next, probePoint))
+				curToNextToProbeInfo := fmt.Sprintf("needAvoid,fmt(cur;next;probeManager): %s", drive.FmtCoord(cur, next, probePoint.Coord))
 				log.Info(curToNextToProbeInfo)
 				debugCurToNextToProbe = append(debugCurToNextToProbe, curToNextToProbeInfo)
-				probesMap[probePoint] = struct{}{}
+				probesMap[probePoint.Coord] = struct{}{}
 				isAgain = true
 			}
 		})
@@ -107,18 +107,34 @@ Again:
 	return avoidAreas, debug, nil
 }
 
-func (c *LBS) isAvoid(cur drive.Coord, next drive.Coord, probePoint drive.Coord) bool {
-	_, b1, _ := geodist.VincentyDistance(geodist.Coord{Lat: cur.Lat, Lon: cur.Lon}, geodist.Coord{Lat: next.Lat, Lon: next.Lon})
-	_, b2, _ := geodist.VincentyDistance(geodist.Coord{Lat: cur.Lat, Lon: cur.Lon}, geodist.Coord{Lat: probePoint.Lat, Lon: probePoint.Lon})
-	_, b3, _ := geodist.VincentyDistance(geodist.Coord{Lat: probePoint.Lat, Lon: probePoint.Lon}, geodist.Coord{Lat: next.Lat, Lon: next.Lon})
+func (c *LBS) isAvoid(cur drive.Coord, next drive.Coord, probePoint probe.Probe) bool {
+	b1 := cur.GeoPoint().GreatCircleDistance(next.GeoPoint())
+	b2 := cur.GeoPoint().GreatCircleDistance(probePoint.GeoPoint())
+	b3 := probePoint.GeoPoint().GreatCircleDistance(next.GeoPoint())
 	gap := b1 - (b2 + b3 - (float64(c.setting.Offset) / 1000))
 	log.Infof("calculate: b1:%f, b2:%f, b3:%f, offset:%f, gap:%f", b1, b2, b3, float64(c.setting.Offset)/1000, gap)
-	return gap > 0
+
+	if gap <= 0 {
+		return false
+	}
+
+	if len(probePoint.Towards) == 0 {
+		return true
+	}
+
+	for _, toward := range probePoint.Towards {
+		aBearingTo := cur.GeoPoint().BearingTo(toward.GeoPoint())
+		pBearingTo := probePoint.GeoPoint().BearingTo(toward.GeoPoint())
+		if math.Abs(aBearingTo-pBearingTo) < 90 || math.Abs(360-aBearingTo-pBearingTo) < 90 {
+			return true
+		}
+	}
+	return false
 }
 
-func (c *LBS) Probes(cur drive.Coord, near float64) ([]drive.Coord, error) {
+func (c *LBS) Probes(cur drive.Coord, near float64) ([]probe.Probe, error) {
 	if near == 0 {
-		return c.probe.Points, nil
+		return c.probeManager.Probes, nil
 	}
-	return c.probe.Near(cur, near), nil
+	return c.probeManager.Near(cur, near), nil
 }

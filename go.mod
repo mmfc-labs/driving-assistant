@@ -4,10 +4,11 @@ go 1.18
 
 require (
 	github.com/fsnotify/fsnotify v1.5.4
+	github.com/ghodss/yaml v1.0.0
 	github.com/gin-gonic/gin v1.8.0
 	github.com/go-playground/validator/v10 v10.11.0
 	github.com/go-resty/resty/v2 v2.7.0
-	github.com/jftuga/geodist v1.0.0
+	github.com/kellydunn/golang-geo v0.7.0
 	github.com/shopspring/decimal v1.3.1
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/viper v1.12.0
@@ -22,6 +23,7 @@ require (
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/jsonreference v0.19.6 // indirect
@@ -33,7 +35,9 @@ require (
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
+	github.com/kylelemons/go-gypsy v1.0.0 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
+	github.com/lib/pq v1.10.6 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
 	github.com/mailru/easyjson v0.7.6 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
@@ -49,6 +53,7 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.3.0 // indirect
 	github.com/ugorji/go/codec v1.2.7 // indirect
+	github.com/ziutek/mymysql v1.5.4 // indirect
 	golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4 // indirect
 	golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17 // indirect
 	golang.org/x/net v0.0.0-20220520000938-2e3eb7b945c2 // indirect

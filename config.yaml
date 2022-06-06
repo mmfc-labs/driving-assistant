@@ -5,12 +5,20 @@ setting:
   maxAvoid: 32 # 最大避让区
   maxRoute: 15 # 最大路线规划次数
 
-probe:
-  points:
+probeManager:
+  probes:
     - lat: 22.57682
       lon: 113.913137
+      towards: # 探头朝向的坐标，有可能多个
+        - lat: 22.576917
+          lon: 113.91323
     - lat: 22.57759
       lon: 113.914101
+      towards: # 探头朝向的坐标，有可能多个
+        - lat: 22.577651
+          lon: 113.914054
+        - lat: 22.577566
+          lon: 113.914139
     - lat: 22.576349
       lon: 113.914133
     - lat: 22.576952
