@@ -35,8 +35,8 @@ func (p *ProbeManager) All() []Probe {
 
 func (p *ProbeManager) CalculateToward() {
 	for _, probe := range p.Probes {
-		for i, toward := range probe.Towards {
-			toward.Value = probe.GeoPoint().BearingTo(probe.Towards[i].GeoPoint())
+		for i, _ := range probe.Towards {
+			probe.Towards[i].Value = probe.GeoPoint().BearingTo(probe.Towards[i].GeoPoint())
 		}
 	}
 }
