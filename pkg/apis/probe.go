@@ -1,6 +1,8 @@
 package apis
 
-import "github.com/mmfc-labs/driving-assistant/pkg/lbs/drive"
+import (
+	"github.com/mmfc-labs/driving-assistant/pkg/probe"
+)
 
 type ProbeReq struct {
 	Lat  float64 `form:"lat" json:"lat"`   // 当前位置经度
@@ -9,5 +11,5 @@ type ProbeReq struct {
 }
 
 type ProbeResp struct {
-	Probes []drive.Coord `json:"probes"`
+	Probes []probe.Probe `json:"probes"`
 }

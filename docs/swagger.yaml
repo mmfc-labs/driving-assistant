@@ -1,5 +1,19 @@
 definitions:
-  apis.DebugLogsResp:
+  apis.Debug:
+    properties:
+      probe_count:
+        description: 需要避让的探头数量
+        type: integer
+      route_count:
+        description: 路线规划次数
+        type: integer
+      route_logs:
+        description: 路线规划日志
+        items:
+          $ref: '#/definitions/apis.DebugLog'
+        type: array
+    type: object
+  apis.DebugLog:
     properties:
       cur_to_next_to_probe:
         description: 本次计算后需要避让的探头，格式为：cur;next;probe (A1;A2;探头)
@@ -13,25 +27,11 @@ definitions:
         description: 本次路线信息传入的避让探头, 第一次传入的为空
         type: string
     type: object
-  apis.DebugResp:
-    properties:
-      probe_count:
-        description: 需要避让的探头数量
-        type: integer
-      route_count:
-        description: 路线规划次数
-        type: integer
-      route_logs:
-        description: 路线规划日志
-        items:
-          $ref: '#/definitions/apis.DebugLogsResp'
-        type: array
-    type: object
   apis.ProbeResp:
     properties:
       probes:
         items:
-          $ref: '#/definitions/drive.Coord'
+          $ref: '#/definitions/probe.Probe'
         type: array
     type: object
   apis.RouteResp:
@@ -43,12 +43,12 @@ definitions:
           type: array
         type: array
       debug:
-        $ref: '#/definitions/apis.DebugResp'
+        $ref: '#/definitions/apis.Debug'
     type: object
   apiserver.Response:
     properties:
       data: {}
-      error_msg:
+      error:
         type: string
     type: object
   drive.Coord:
@@ -56,6 +56,28 @@ definitions:
       lat:
         type: number
       lon:
+        type: number
+    type: object
+  probe.Probe:
+    properties:
+      lat:
+        type: number
+      lon:
+        type: number
+      towards:
+        description: 探头朝向的坐标
+        items:
+          $ref: '#/definitions/probe.Toward'
+        type: array
+    type: object
+  probe.Toward:
+    properties:
+      lat:
+        type: number
+      lon:
+        type: number
+      value:
+        description: 探头朝向的角度值
         type: number
     type: object
 info:

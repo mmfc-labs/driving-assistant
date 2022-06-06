@@ -132,7 +132,27 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "apis.DebugLogsResp": {
+        "apis.Debug": {
+            "type": "object",
+            "properties": {
+                "probe_count": {
+                    "description": "需要避让的探头数量",
+                    "type": "integer"
+                },
+                "route_count": {
+                    "description": "路线规划次数",
+                    "type": "integer"
+                },
+                "route_logs": {
+                    "description": "路线规划日志",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/apis.DebugLog"
+                    }
+                }
+            }
+        },
+        "apis.DebugLog": {
             "type": "object",
             "properties": {
                 "cur_to_next_to_probe": {
@@ -152,33 +172,13 @@ const docTemplate = `{
                 }
             }
         },
-        "apis.DebugResp": {
-            "type": "object",
-            "properties": {
-                "probe_count": {
-                    "description": "需要避让的探头数量",
-                    "type": "integer"
-                },
-                "route_count": {
-                    "description": "路线规划次数",
-                    "type": "integer"
-                },
-                "route_logs": {
-                    "description": "路线规划日志",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/apis.DebugLogsResp"
-                    }
-                }
-            }
-        },
         "apis.ProbeResp": {
             "type": "object",
             "properties": {
                 "probes": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/drive.Coord"
+                        "$ref": "#/definitions/probe.Probe"
                     }
                 }
             }
@@ -196,7 +196,7 @@ const docTemplate = `{
                     }
                 },
                 "debug": {
-                    "$ref": "#/definitions/apis.DebugResp"
+                    "$ref": "#/definitions/apis.Debug"
                 }
             }
         },
@@ -204,7 +204,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {},
-                "error_msg": {
+                "error": {
                     "type": "string"
                 }
             }
@@ -216,6 +216,39 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "lon": {
+                    "type": "number"
+                }
+            }
+        },
+        "probe.Probe": {
+            "type": "object",
+            "properties": {
+                "lat": {
+                    "type": "number"
+                },
+                "lon": {
+                    "type": "number"
+                },
+                "towards": {
+                    "description": "探头朝向的坐标",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/probe.Toward"
+                    }
+                }
+            }
+        },
+        "probe.Toward": {
+            "type": "object",
+            "properties": {
+                "lat": {
+                    "type": "number"
+                },
+                "lon": {
+                    "type": "number"
+                },
+                "value": {
+                    "description": "探头朝向的角度值",
                     "type": "number"
                 }
             }
