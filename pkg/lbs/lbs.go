@@ -49,74 +49,73 @@ func NewLBS(setting config.Setting, probeManager probe.ProbeManager) *LBS {
 //
 //满足条件一与条件二则需要避让该探头
 func (c *LBS) Route(from, to drive.Coord) (avoidAreas [][]drive.Coord, avoidProbes []drive.Coord, debug *apis.Debug, err error) {
-	probesMap := make(map[drive.Coord]struct{}, 0)
+	probesSet := probe.NewProbeSet()
 	debug = &apis.Debug{}
 	debug.RouteLogs = make([]*apis.DebugLog, 0)
-	count := 0
+	routeCount := 0
+
 Again:
-	count++
-	debugLog := &apis.DebugLog{}
-
-	if count > c.setting.MaxRoute {
-		return avoidAreas, avoidProbes, debug, apis.RouteOutOfRange
-	}
-
-	probes := make([]drive.Coord, 0, len(probesMap))
+	routeCount++
 	isAgain := false
 
-	for coord, _ := range probesMap {
-		probes = append(probes, coord)
+	if routeCount > c.setting.MaxRoute {
+		return avoidAreas, avoidProbes, debug, apis.ErrorRouteOutOfRange
 	}
 
-	route, err := c.client.GetRoutes(from, to, probes, c.setting.AvoidAreaOffset)
+	route, err := c.client.GetRoutes(from, to, probesSet.ToSlice(), c.setting.AvoidAreaOffset)
 	if err != nil {
 		return avoidAreas, avoidProbes, debug, err
 	}
 	routePoints := route[0].Points
 
-	// Debug Info
-	debugLog.Debug(count, routePoints, probes)
-
+	// Add Debug Info
+	debugLog := &apis.DebugLog{}
 	debugCurToNextToProbe := make([]string, 0)
+	debugLog.Debug(routeCount, routePoints, probesSet.ToSlice())
+
+	// 循环坐标串
 	for i := 0; i < len(routePoints)-1; i++ {
 		cur := routePoints[i]
 		next := routePoints[i+1]
+		//获取附近5km的探头
 		probePoints := c.probeManager.Near(cur, 5)
 		if len(probePoints) == 0 {
 			continue
 		}
 		stream.NewSlice(probePoints).ForEach(func(_ int, probePoint probe.Probe) {
 			if c.isAvoid(cur, next, probePoint) {
-				curToNextToProbeInfo := fmt.Sprintf("needAvoid,fmt(cur;next;probeManager): %s", drive.FmtCoord(cur, next, probePoint.Coord))
+				curToNextToProbeInfo := fmt.Sprintf("需要避让的探头,格式为(当前坐标串A1;下一个坐标串A2;探头坐标): %s", drive.FmtCoord(cur, next, probePoint.Coord))
 				log.Info(curToNextToProbeInfo)
 				debugCurToNextToProbe = append(debugCurToNextToProbe, curToNextToProbeInfo)
-				probesMap[probePoint.Coord] = struct{}{}
+				probesSet[probePoint.Coord] = struct{}{}
 				isAgain = true
 			}
 		})
 	}
 
-	// Debug Info
-	debug.Debug(debugLog, debugCurToNextToProbe, count, probesMap)
+	// Add Debug Info
+	debug.Debug(debugLog, debugCurToNextToProbe, routeCount, probesSet)
+
+	if len(probesSet) > c.setting.MaxAvoid {
+		return avoidAreas, avoidProbes, debug, apis.ErrorAvoidOutOfRange
+	}
 
 	if isAgain {
-		log.Info("again,count:", count)
+		log.Info("again,routeCount:", routeCount)
 		goto Again
-	}
-	if len(probesMap) > c.setting.MaxAvoid {
-		return avoidAreas, avoidProbes, debug, apis.AvoidOutOfRange
 	}
 
 	avoidAreas = make([][]drive.Coord, 0)
 	avoidProbes = make([]drive.Coord, 0)
-	for p := range probesMap {
+	for p := range probesSet {
 		avoidAreas = append(avoidAreas, drive.ConvCoordToAvoidArea(p, c.setting.AvoidAreaOffset))
 		avoidProbes = append(avoidProbes, p)
 	}
-	log.WithField("avoidPoints", probesMap).WithField("count", count).Info("根据直线距离计算需要避让的探头")
+	log.Infof("路线规划完成,路线规划次数:%d,避让的探头:%s", routeCount, drive.FmtCoord(avoidProbes...))
 	return avoidAreas, avoidProbes, debug, nil
 }
 
+// isAvoid 根绝 A1 A2 探头 来判断是否需要避让
 func (c *LBS) isAvoid(cur drive.Coord, next drive.Coord, probePoint probe.Probe) bool {
 
 	//A1 -> A2   直线距离 B1
@@ -127,7 +126,6 @@ func (c *LBS) isAvoid(cur drive.Coord, next drive.Coord, probePoint probe.Probe)
 	b3 := probePoint.GeoPoint().GreatCircleDistance(next.GeoPoint())
 	//B1 >= B2+B3-offset 即路过探头
 	gap := b1 - (b2 + b3 - (float64(c.setting.Offset) / 1000))
-	log.Infof("calculate: b1:%f, b2:%f, b3:%f, offset:%f, gap:%f", b1, b2, b3, float64(c.setting.Offset)/1000, gap)
 
 	if gap <= 0 {
 		return false

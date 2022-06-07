@@ -26,8 +26,9 @@ type DebugLog struct {
 }
 
 func (d *DebugLog) Debug(count int, routePoints []drive.Coord, probes []drive.Coord) {
-	routeInfo := fmt.Sprintf("第%d次路线:%s", count, drive.FmtCoord(routePoints...))
-	log.Info(routeInfo)
+	routeInfo := fmt.Sprintf("第%d次路线规划,坐标串:%s", count, drive.FmtCoord(routePoints...))
 	d.RouteInfo = routeInfo
-	d.RouteProbeInfo = fmt.Sprintf("第%d次路线,传入的探头:%s", count, drive.FmtCoord(probes...))
+	d.RouteProbeInfo = fmt.Sprintf("第%d次路线规划,传入的探头:%s", count, drive.FmtCoord(probes...))
+	log.Info(d.RouteInfo)
+	log.Info(d.RouteProbeInfo)
 }

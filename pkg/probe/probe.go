@@ -40,3 +40,17 @@ func (p *ProbeManager) CalculateToward() {
 		}
 	}
 }
+
+type ProbeSet map[drive.Coord]struct{}
+
+func (s ProbeSet) ToSlice() []drive.Coord {
+	probes := make([]drive.Coord, 0, len(s))
+	for coord, _ := range s {
+		probes = append(probes, coord)
+	}
+	return probes
+}
+
+func NewProbeSet() ProbeSet {
+	return make(map[drive.Coord]struct{})
+}
