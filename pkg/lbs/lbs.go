@@ -39,7 +39,14 @@ func NewLBS(setting config.Setting, probeManager probe.ProbeManager) *LBS {
 //A1 -> 探头1 直线距离 B2
 //探头1 -> A2 直线距离 B3
 //
-//B1 >= B2+B3 即路过探头
+//B1 >= B2+B3-offset 即路过探头
+//
+//
+// A1->A2             朝向toward1
+// 探头->探头Towards    朝向toward2
+// toward1 与 toward2 差值小于 TowardRange 则视为同一个方向
+//
+// 需要满足 路过探头以及 同一个方向 则需要避让改探头
 func (c *LBS) Route(from, to drive.Coord) (avoidAreas [][]drive.Coord, debug *apis.Debug, err error) {
 	probesMap := make(map[drive.Coord]struct{}, 0)
 	debug = &apis.Debug{}
@@ -108,9 +115,14 @@ Again:
 }
 
 func (c *LBS) isAvoid(cur drive.Coord, next drive.Coord, probePoint probe.Probe) bool {
+
+	//A1 -> A2   直线距离 B1
+	//A1 -> 探头1 直线距离 B2
+	//探头1 -> A2 直线距离 B3
 	b1 := cur.GeoPoint().GreatCircleDistance(next.GeoPoint())
 	b2 := cur.GeoPoint().GreatCircleDistance(probePoint.GeoPoint())
 	b3 := probePoint.GeoPoint().GreatCircleDistance(next.GeoPoint())
+	//B1 >= B2+B3-offset 即路过探头
 	gap := b1 - (b2 + b3 - (float64(c.setting.Offset) / 1000))
 	log.Infof("calculate: b1:%f, b2:%f, b3:%f, offset:%f, gap:%f", b1, b2, b3, float64(c.setting.Offset)/1000, gap)
 
@@ -122,6 +134,9 @@ func (c *LBS) isAvoid(cur drive.Coord, next drive.Coord, probePoint probe.Probe)
 		return true
 	}
 
+	// A1->A2             朝向toward1
+	// 探头->探头Towards    朝向toward2
+	// toward1 与 toward2 差值小于 TowardRange 则视为同一个方向
 	toward1 := cur.GeoPoint().BearingTo(next.GeoPoint())
 	for _, toward := range probePoint.Towards {
 		toward2 := probePoint.GeoPoint().BearingTo(toward.GeoPoint())
