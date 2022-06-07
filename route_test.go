@@ -17,7 +17,7 @@ func TestRoute(t *testing.T) {
 			name string        // 测试用例名称
 			from drive.Coord   // from 坐标
 			to   drive.Coord   // to 坐标
-			want []drive.Coord // 应该要屏蔽的摄像头
+			want []drive.Coord // 应该要避让的摄像头，存在多次路线规划，很难在一开始知道哪些探头是需要避让的
 		}{
 			{
 				name: "case1",
@@ -34,10 +34,12 @@ func TestRoute(t *testing.T) {
 			t.Run(tt.name, func(t *testing.T) {
 				_, avoidProbes, _, err := lbsClient.Route(tt.from, tt.to)
 
+				// err == nil 说明规划路线成功
 				if err != nil {
 					assert.Error(t, err)
 				}
-				assert.Equal(t, len(tt.want), len(avoidProbes))
+
+				// 判断需要避让的摄像头是否匹配
 				assert.ElementsMatch(t, tt.want, avoidProbes)
 			})
 		}
