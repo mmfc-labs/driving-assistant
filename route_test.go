@@ -17,7 +17,7 @@ func TestRoute(t *testing.T) {
 			name string        // 测试用例名称
 			from drive.Coord   // from 坐标
 			to   drive.Coord   // to 坐标
-			want []drive.Coord // 应该要避让的摄像头，存在多次路线规划，很难在一开始知道哪些探头是需要避让的
+			want []drive.Coord // 应该要避让的摄像头（存在多次路线规划，很难在设计用例时知道哪些探头是需要避让的）
 		}{
 			{
 				name: "case1",
