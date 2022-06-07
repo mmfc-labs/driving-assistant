@@ -10,7 +10,7 @@ jobs:
   server-test:
     strategy:
       matrix:
-        platform: [ubuntu-latest, macos-latest]
+        platform: [ubuntu-latest]
         go: ['1.18']
     runs-on: ${{ matrix.platform }}
 
@@ -30,9 +30,9 @@ jobs:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ matrix.go }}
 
-#      - name: Test
-#        run: |
-#          make test
+      - name: Test
+        run: |
+          make test
 #
 #      - name: Codecov
 #        uses: codecov/codecov-action@v3.1.0
