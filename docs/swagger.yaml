@@ -37,13 +37,20 @@ definitions:
   apis.RouteResp:
     properties:
       avoid_areas:
+        description: 需要避让的区域
         items:
           items:
             $ref: '#/definitions/drive.Coord'
           type: array
         type: array
+      avoidProbes:
+        description: 需要避让的探头
+        items:
+          $ref: '#/definitions/drive.Coord'
+        type: array
       debug:
         $ref: '#/definitions/apis.Debug'
+        description: debug信息
     type: object
   apiserver.Response:
     properties:

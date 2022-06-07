@@ -4,7 +4,7 @@ setting:
   avoidAreaOffset: 0.000100 #生成四边形避让区偏移量, 单位经纬度
   maxAvoid: 32 # 最大避让区
   maxRoute: 15 # 最大路线规划次数
-  towardRange: 90 # 路段朝向角度与探头的朝向角度值差，如果小于towardRange则认为是同一个方向
+  towardRange: 70 # 路段朝向角度与探头的朝向角度值差，如果小于towardRange则认为是同一个方向
 
 probeManager:
   probes:
