@@ -186,7 +186,15 @@ const docTemplate = `{
         "apis.RouteResp": {
             "type": "object",
             "properties": {
+                "avoidProbes": {
+                    "description": "需要避让的探头",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/drive.Coord"
+                    }
+                },
                 "avoid_areas": {
+                    "description": "需要避让的区域",
                     "type": "array",
                     "items": {
                         "type": "array",
@@ -196,6 +204,7 @@ const docTemplate = `{
                     }
                 },
                 "debug": {
+                    "description": "debug信息",
                     "$ref": "#/definitions/apis.Debug"
                 }
             }

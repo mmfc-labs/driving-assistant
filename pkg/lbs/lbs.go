@@ -30,24 +30,25 @@ func NewLBS(setting config.Setting, probeManager probe.ProbeManager) *LBS {
 }
 
 //Route 根据直线距离计算需要避让的探头
-//首先获取到路线A坐标串
-//A1 -> A2 -> A3 -> A4 -> AN
+//首先获取到路线A坐标串,不传入避让区
+//A1 -> A2 -> A3 -> A4 -> AN. 需要转弯的都会在十字路口都会有坐标串
 //
-// 需要转弯在十字路口都会有坐标串
+//
+//条件一:
 //
 //A1 -> A2   直线距离 B1
 //A1 -> 探头1 直线距离 B2
 //探头1 -> A2 直线距离 B3
-//
 //B1 >= B2+B3-offset 即路过探头
 //
+// 条件二:
 //
-// A1->A2             朝向toward1
-// 探头->探头Towards    朝向toward2
-// toward1 与 toward2 差值小于 TowardRange 则视为同一个方向
+//A1->A2             朝向toward1 （角度值）
+//探头->探头朝向坐标    朝向toward2 （角度值）
+//toward1 与 toward2 差值小于 TowardRange 则视为同一个方向
 //
-// 需要满足 路过探头以及 同一个方向 则需要避让改探头
-func (c *LBS) Route(from, to drive.Coord) (avoidAreas [][]drive.Coord, debug *apis.Debug, err error) {
+//满足条件一与条件二则需要避让该探头
+func (c *LBS) Route(from, to drive.Coord) (avoidAreas [][]drive.Coord, avoidProbes []drive.Coord, debug *apis.Debug, err error) {
 	probesMap := make(map[drive.Coord]struct{}, 0)
 	debug = &apis.Debug{}
 	debug.RouteLogs = make([]*apis.DebugLog, 0)
@@ -57,7 +58,7 @@ Again:
 	debugLog := &apis.DebugLog{}
 
 	if count > c.setting.MaxRoute {
-		return avoidAreas, debug, apis.RouteOutOfRange
+		return avoidAreas, avoidProbes, debug, apis.RouteOutOfRange
 	}
 
 	probes := make([]drive.Coord, 0, len(probesMap))
@@ -69,7 +70,7 @@ Again:
 
 	route, err := c.client.GetRoutes(from, to, probes, c.setting.AvoidAreaOffset)
 	if err != nil {
-		return avoidAreas, debug, err
+		return avoidAreas, avoidProbes, debug, err
 	}
 	routePoints := route[0].Points
 
@@ -103,15 +104,17 @@ Again:
 		goto Again
 	}
 	if len(probesMap) > c.setting.MaxAvoid {
-		return avoidAreas, debug, apis.AvoidOutOfRange
+		return avoidAreas, avoidProbes, debug, apis.AvoidOutOfRange
 	}
 
 	avoidAreas = make([][]drive.Coord, 0)
-	for a := range probesMap {
-		avoidAreas = append(avoidAreas, drive.ConvCoordToAvoidArea(a, c.setting.AvoidAreaOffset))
+	avoidProbes = make([]drive.Coord, 0)
+	for p := range probesMap {
+		avoidAreas = append(avoidAreas, drive.ConvCoordToAvoidArea(p, c.setting.AvoidAreaOffset))
+		avoidProbes = append(avoidProbes, p)
 	}
 	log.WithField("avoidPoints", probesMap).WithField("count", count).Info("根据直线距离计算需要避让的探头")
-	return avoidAreas, debug, nil
+	return avoidAreas, avoidProbes, debug, nil
 }
 
 func (c *LBS) isAvoid(cur drive.Coord, next drive.Coord, probePoint probe.Probe) bool {
