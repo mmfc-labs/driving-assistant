@@ -11,6 +11,6 @@ type RouteReq struct {
 
 type RouteResp struct {
 	AvoidAreas  [][]drive.Coord `json:"avoid_areas"`  // 需要避让的区域
-	AvoidProbes []drive.Coord   `yaml:"avoid_probes"` // 需要避让的探头
+	AvoidProbes []drive.Coord   `json:"avoid_probes"` // 需要避让的探头
 	Debug       *Debug          `json:"debug"`        //debug信息
 }
