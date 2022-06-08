@@ -3,7 +3,7 @@ package apiserver
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/mmfc-labs/driving-assistant/pkg/apis"
-	"github.com/mmfc-labs/driving-assistant/pkg/lbs/drive"
+	"github.com/mmfc-labs/driving-assistant/pkg/geo"
 	"net/http"
 )
 
@@ -29,7 +29,7 @@ func (s *APIServer) route(c *gin.Context) {
 	}
 
 	// 起点，终点
-	from, to := drive.Coord{Lat: req.FromLat, Lon: req.FromLon}, drive.Coord{Lat: req.ToLat, Lon: req.ToLon}
+	from, to := geo.Coord{Lat: req.FromLat, Lon: req.FromLon}, geo.Coord{Lat: req.ToLat, Lon: req.ToLon}
 	//根据直线距离计算需要避让的探头
 	avoidAreas, avoidProbes, debug, err := s.lbs.Route(from, to)
 	if err != nil {
@@ -59,7 +59,7 @@ func (s *APIServer) probes(c *gin.Context) {
 		Result(http.StatusBadRequest, nil, err.Error(), c)
 		return
 	}
-	probes, err := s.lbs.Probes(drive.Coord{Lat: req.Lat, Lon: req.Lon}, req.Near)
+	probes, err := s.lbs.Probes(geo.Coord{Lat: req.Lat, Lon: req.Lon}, req.Near)
 	if err != nil {
 		Result(http.StatusInternalServerError, nil, err.Error(), c)
 		return

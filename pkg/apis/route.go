@@ -1,6 +1,6 @@
 package apis
 
-import "github.com/mmfc-labs/driving-assistant/pkg/lbs/drive"
+import "github.com/mmfc-labs/driving-assistant/pkg/geo"
 
 type RouteReq struct {
 	FromLat float64 `form:"from_lat" json:"from_lat" validate:"required"`
@@ -10,7 +10,7 @@ type RouteReq struct {
 }
 
 type RouteResp struct {
-	AvoidAreas  [][]drive.Coord `json:"avoid_areas"`  // 需要避让的区域
-	AvoidProbes []drive.Coord   `json:"avoid_probes"` // 需要避让的探头
-	Debug       *Debug          `json:"debug"`        //debug信息
+	AvoidAreas  [][]geo.Coord `json:"avoid_areas"`  // 需要避让的区域
+	AvoidProbes []geo.Coord   `json:"avoid_probes"` // 需要避让的探头
+	Debug       *Debug        `json:"debug"`        //debug信息
 }

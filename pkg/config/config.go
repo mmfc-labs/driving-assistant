@@ -9,10 +9,10 @@ import (
 )
 
 // LoadConfig watch configPath change, callback fn
-func LoadConfig(configPath string, fn func(Setting, probe.ProbeManager)) error {
+func LoadConfig(configPath string, fn func(Setting, probe.Manager)) error {
 	var err error
 	var setting Setting
-	var probeManager probe.ProbeManager
+	var probeManager probe.Manager
 
 	conf := viper.New()
 	conf.SetConfigFile(configPath)
@@ -31,7 +31,7 @@ func LoadConfig(configPath string, fn func(Setting, probe.ProbeManager)) error {
 
 	conf.OnConfigChange(func(in fsnotify.Event) {
 		var setting Setting
-		var probeManager probe.ProbeManager
+		var probeManager probe.Manager
 		if err = conf.UnmarshalKey("setting", &setting); err != nil {
 			log.Error("Fatal error config setting: %w", err)
 			return
@@ -50,8 +50,8 @@ func LoadConfig(configPath string, fn func(Setting, probe.ProbeManager)) error {
 }
 
 type Config struct {
-	Setting Setting            `yaml:"setting"`
-	Probe   probe.ProbeManager `yaml:"probe"`
+	Setting Setting       `yaml:"setting"`
+	Probe   probe.Manager `yaml:"probe"`
 }
 
 type Setting struct {
