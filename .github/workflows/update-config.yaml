@@ -14,4 +14,4 @@ jobs:
           KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
         with:
           args: |
-            make update-configmap
+            kubectl create configmap driving-assistant-dev-conf --from-file=config.yaml -n driving-assistant-system -o yaml --dry-run | kubectl apply -f -
