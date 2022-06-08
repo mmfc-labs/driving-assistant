@@ -5,7 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-resty/resty/v2"
+	"github.com/mmfc-labs/driving-assistant/pkg/apis"
 	"github.com/mmfc-labs/driving-assistant/pkg/lbs/drive"
+	log "github.com/sirupsen/logrus"
 	"github.com/xyctruth/stream"
 	"strings"
 	"time"
@@ -71,11 +73,14 @@ Retry:
 	}
 
 	if p.Status > 0 {
+		log.Errorf("tencent route status:%d , message:%s", p.Status, p.Message)
 		if p.Status == 120 {
 			time.Sleep(time.Millisecond * 500)
 			goto Retry
 		}
-
+		if p.Status == 410 {
+			return nil, apis.ErrorRouteFailed
+		}
 		return nil, errors.New("RouteLogs:" + p.Message)
 	}
 	routes := make([]drive.Route, 0, len(p.Result.Routes))

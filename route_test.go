@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/mmfc-labs/driving-assistant/pkg/apis"
 	"github.com/mmfc-labs/driving-assistant/pkg/config"
 	"github.com/mmfc-labs/driving-assistant/pkg/lbs"
 	"github.com/mmfc-labs/driving-assistant/pkg/lbs/drive"
@@ -21,18 +22,18 @@ func TestRoute(t *testing.T) {
 			wantError       error         // 路线规划错误， error == nil 成功规划 错误类型：https://github.com/mmfc-labs/driving-assistant/blob/main/pkg/apis/error.go
 		}{
 			{
-				name:            "case1",
+				name:            "简单路线",
 				from:            drive.Coord{Lat: 22.577781, Lon: 113.910683},
 				to:              drive.Coord{Lat: 22.576752, Lon: 113.914866},
-				wantAvoidProbes: []drive.Coord{{Lat: 22.576952, Lon: 113.914656}, {Lat: 22.576974, Lon: 113.914728}, {Lat: 22.57759, Lon: 113.914101}},
+				wantAvoidProbes: []drive.Coord{{22.577590, 113.914101}},
 				wantError:       nil,
 			},
 			{
-				name:            "case2",
-				from:            drive.Coord{Lat: 22.577781, Lon: 113.910683},
-				to:              drive.Coord{Lat: 22.576752, Lon: 113.914866},
-				wantAvoidProbes: []drive.Coord{{Lat: 22.576952, Lon: 113.914656}, {Lat: 22.576974, Lon: 113.914728}, {Lat: 22.57759, Lon: 113.914101}},
-				wantError:       nil,
+				name:            "路线必须经过避让区，导致第三方地图无法规划路线",
+				from:            drive.Coord{Lat: 22.578005, Lon: 113.913589},
+				to:              drive.Coord{Lat: 22.577347, Lon: 113.914361},
+				wantAvoidProbes: nil,
+				wantError:       apis.ErrorRouteFailed,
 			},
 		}
 		for _, tt := range tests {

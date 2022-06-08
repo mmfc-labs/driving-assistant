@@ -38,4 +38,5 @@ jobs:
           KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
         with:
           args: |
+            cp config.yaml charts/
             helm upgrade driving-assistant-dev charts --install --create-namespace --wait --namespace=driving-assistant-system --set=image.tag=${{ steps.get_version.outputs.VERSION }} --values=charts/values.yaml  --atomic
