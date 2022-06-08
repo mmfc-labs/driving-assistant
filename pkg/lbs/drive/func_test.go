@@ -2,6 +2,7 @@ package drive
 
 import (
 	"fmt"
+	"github.com/mmfc-labs/driving-assistant/pkg/geo"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -9,48 +10,48 @@ import (
 func TestConvCoordToQuadrilateral(t *testing.T) {
 	tests := []struct {
 		name        string
-		inputCoord  Coord
+		inputCoord  geo.Coord
 		inputOffset float64
-		want        []Coord
+		want        []geo.Coord
 	}{
 		{
 			name:        "case",
-			inputCoord:  Coord{Lat: 1, Lon: 1},
+			inputCoord:  geo.NewCoord(1, 1),
 			inputOffset: 0.1,
-			want: []Coord{
-				{Lat: 1.1, Lon: 0.9},
-				{Lat: 1.1, Lon: 1.1},
-				{Lat: 0.9, Lon: 0.9},
-				{Lat: 0.9, Lon: 1.1},
+			want: []geo.Coord{
+				geo.NewCoord(1.1, 0.9),
+				geo.NewCoord(1.1, 1.1),
+				geo.NewCoord(0.9, 0.9),
+				geo.NewCoord(0.9, 1.1),
 			},
 		},
 		{
 			name:        "case",
-			inputCoord:  Coord{Lat: 1.1, Lon: 1.1},
+			inputCoord:  geo.NewCoord(1.1, 1.1),
 			inputOffset: 0.1,
-			want: []Coord{
-				{Lat: 1.2, Lon: 1},
-				{Lat: 1.2, Lon: 1.2},
-				{Lat: 1, Lon: 1},
-				{Lat: 1, Lon: 1.2},
+			want: []geo.Coord{
+				geo.NewCoord(1.2, 1),
+				geo.NewCoord(1.2, 1.2),
+				geo.NewCoord(1, 1),
+				geo.NewCoord(1, 1.2),
 			},
 		},
 		{
 			name:        "case",
-			inputCoord:  Coord{Lat: 1.000001, Lon: 1.000001},
+			inputCoord:  geo.NewCoord(1.000001, 1.000001),
 			inputOffset: 0.000001,
-			want: []Coord{
-				{Lat: 1.000002, Lon: 1.000000},
-				{Lat: 1.000002, Lon: 1.000002},
-				{Lat: 1.000000, Lon: 1.000000},
-				{Lat: 1.000000, Lon: 1.000002},
+			want: []geo.Coord{
+				geo.NewCoord(1.000002, 1.000000),
+				geo.NewCoord(1.000002, 1.000002),
+				geo.NewCoord(1.000000, 1.000000),
+				geo.NewCoord(1.000000, 1.000002),
 			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := ConvCoordToAvoidArea(tt.inputCoord, tt.inputOffset)
+			got := tt.inputCoord.ToAvoidArea(tt.inputOffset)
 			assert.Equal(t, tt.want, got)
 		})
 	}
@@ -58,7 +59,7 @@ func TestConvCoordToQuadrilateral(t *testing.T) {
 }
 
 func TestDecimal(t *testing.T) {
-	c := Coord{Lat: 22.560413, Lon: 113.874613}
-	cs := ConvCoordToAvoidArea(c, 0.000100)
-	fmt.Println(FmtCoord(cs...))
+	c := geo.NewCoord(22.560413, 113.874613)
+	cs := c.ToAvoidArea(0.000100)
+	fmt.Println(geo.Coords(cs).String())
 }

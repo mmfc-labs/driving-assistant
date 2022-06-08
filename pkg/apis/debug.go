@@ -2,7 +2,7 @@ package apis
 
 import (
 	"fmt"
-	"github.com/mmfc-labs/driving-assistant/pkg/lbs/drive"
+	"github.com/mmfc-labs/driving-assistant/pkg/geo"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -12,10 +12,10 @@ type Debug struct {
 	RouteLogs  []*DebugLog `json:"route_logs"`  // 路线规划日志
 }
 
-func (debug *Debug) Debug(debugLog *DebugLog, debugCurToNextToProbe []string, count int, probesMap map[drive.Coord]struct{}) {
+func (debug *Debug) Debug(debugLog *DebugLog, debugCurToNextToProbe []string, count int, probes []geo.Coord) {
 	debugLog.CurToNextToProbe = debugCurToNextToProbe
 	debug.RouteLogs = append(debug.RouteLogs, debugLog)
-	debug.ProbeCount = len(probesMap)
+	debug.ProbeCount = len(probes)
 	debug.RouteCount = count
 }
 
@@ -25,10 +25,10 @@ type DebugLog struct {
 	CurToNextToProbe []string `json:"cur_to_next_to_probe"` //本次计算后需要避让的探头，格式为：cur;next;probe (A1;A2;探头)
 }
 
-func (d *DebugLog) Debug(count int, routePoints []drive.Coord, probes []drive.Coord) {
-	routeInfo := fmt.Sprintf("第%d次路线规划,坐标串:%s", count, drive.FmtCoord(routePoints...))
+func (d *DebugLog) Debug(count int, routePoints []geo.Coord, probes []geo.Coord) {
+	routeInfo := fmt.Sprintf("第%d次路线规划,坐标串:%s", count, geo.Coords(routePoints))
 	d.RouteInfo = routeInfo
-	d.RouteProbeInfo = fmt.Sprintf("第%d次路线规划,传入的探头:%s", count, drive.FmtCoord(probes...))
+	d.RouteProbeInfo = fmt.Sprintf("第%d次路线规划,传入的探头:%s", count, geo.Coords(probes))
 	log.Info(d.RouteInfo)
 	log.Info(d.RouteProbeInfo)
 }

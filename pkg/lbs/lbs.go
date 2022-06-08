@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/mmfc-labs/driving-assistant/pkg/apis"
 	"github.com/mmfc-labs/driving-assistant/pkg/config"
+	"github.com/mmfc-labs/driving-assistant/pkg/geo"
 	"github.com/mmfc-labs/driving-assistant/pkg/lbs/drive"
 	"github.com/mmfc-labs/driving-assistant/pkg/lbs/drive/tencent"
 	"github.com/mmfc-labs/driving-assistant/pkg/probe"
@@ -16,11 +17,11 @@ import (
 type LBS struct {
 	client       drive.Client
 	setting      config.Setting
-	probeManager probe.ProbeManager
+	probeManager probe.Manager
 }
 
 // NewLBS
-func NewLBS(setting config.Setting, probeManager probe.ProbeManager) *LBS {
+func NewLBS(setting config.Setting, probeManager probe.Manager) *LBS {
 	c := &LBS{
 		client:       tencent.NewClient(setting.LBSKey),
 		setting:      setting,
@@ -48,7 +49,7 @@ func NewLBS(setting config.Setting, probeManager probe.ProbeManager) *LBS {
 //toward1 与 toward2 差值小于 TowardRange 则视为同一个方向
 //
 //满足条件一与条件二则需要避让该探头
-func (c *LBS) Route(from, to drive.Coord) (avoidAreas [][]drive.Coord, avoidProbes []drive.Coord, debug *apis.Debug, err error) {
+func (c *LBS) Route(from, to geo.Coord) (avoidAreas [][]geo.Coord, avoidProbes []geo.Coord, debug *apis.Debug, err error) {
 	probesSet := probe.NewProbeSet()
 	debug = &apis.Debug{}
 	debug.RouteLogs = make([]*apis.DebugLog, 0)
@@ -84,19 +85,19 @@ Again:
 		}
 		stream.NewSlice(probePoints).ForEach(func(_ int, probePoint probe.Probe) {
 			if c.isAvoid(cur, next, probePoint) {
-				curToNextToProbeInfo := fmt.Sprintf("第%d次路线规划,新增避让探头,格式为(当前坐标串A1;下一个坐标串A2;探头坐标): %s", routeCount, drive.FmtCoord(cur, next, probePoint.Coord))
+				curToNextToProbeInfo := fmt.Sprintf("第%d次路线规划,新增避让探头,格式为(当前坐标串A1;下一个坐标串A2;探头坐标): %s", routeCount, geo.Coords{cur, next, probePoint.Coord})
 				log.Info(curToNextToProbeInfo)
 				debugCurToNextToProbe = append(debugCurToNextToProbe, curToNextToProbeInfo)
-				probesSet[probePoint.Coord] = struct{}{}
+				probesSet.Add(probePoint.Coord)
 				isAgain = true
 			}
 		})
 	}
 
 	// Add Debug Info
-	debug.Debug(debugLog, debugCurToNextToProbe, routeCount, probesSet)
+	debug.Debug(debugLog, debugCurToNextToProbe, routeCount, probesSet.ToSlice())
 
-	if len(probesSet) > c.setting.MaxAvoid {
+	if probesSet.Len() > c.setting.MaxAvoid {
 		return avoidAreas, avoidProbes, debug, apis.ErrorAvoidOutOfRange
 	}
 
@@ -105,25 +106,21 @@ Again:
 		goto Again
 	}
 
-	avoidAreas = make([][]drive.Coord, 0)
-	avoidProbes = make([]drive.Coord, 0)
-	for p := range probesSet {
-		avoidAreas = append(avoidAreas, drive.ConvCoordToAvoidArea(p, c.setting.AvoidAreaOffset))
-		avoidProbes = append(avoidProbes, p)
-	}
-	log.Infof("路线规划完成,路线规划次数:%d,避让的探头:%s", routeCount, drive.FmtCoord(avoidProbes...))
+	avoidAreas = probesSet.ToAvoidArea(c.setting.AvoidAreaOffset)
+	avoidProbes = probesSet.ToSlice()
+	log.Infof("路线规划完成,路线规划次数:%d,避让的探头:%s", routeCount, geo.Coords(avoidProbes))
 	return avoidAreas, avoidProbes, debug, nil
 }
 
 // isAvoid 根绝 A1 A2 探头 来判断是否需要避让
-func (c *LBS) isAvoid(cur drive.Coord, next drive.Coord, probePoint probe.Probe) bool {
+func (c *LBS) isAvoid(cur geo.Coord, next geo.Coord, probePoint probe.Probe) bool {
 
 	//A1 -> A2   直线距离 B1
 	//A1 -> 探头1 直线距离 B2
 	//探头1 -> A2 直线距离 B3
-	b1 := cur.GeoPoint().GreatCircleDistance(next.GeoPoint())
-	b2 := cur.GeoPoint().GreatCircleDistance(probePoint.GeoPoint())
-	b3 := probePoint.GeoPoint().GreatCircleDistance(next.GeoPoint())
+	b1 := cur.Distance(next)
+	b2 := cur.Distance(probePoint.Coord)
+	b3 := probePoint.Distance(next)
 	//B1 >= B2+B3-offset 即路过探头
 	gap := b1 - (b2 + b3 - (float64(c.setting.Offset) / 1000))
 
@@ -138,9 +135,9 @@ func (c *LBS) isAvoid(cur drive.Coord, next drive.Coord, probePoint probe.Probe)
 	// A1->A2             朝向toward1
 	// 探头->探头Towards    朝向toward2
 	// toward1 与 toward2 差值小于 TowardRange 则视为同一个方向
-	toward1 := cur.GeoPoint().BearingTo(next.GeoPoint())
+	toward1 := cur.BearingTo(next)
 	for _, toward := range probePoint.Towards {
-		toward2 := probePoint.GeoPoint().BearingTo(toward.GeoPoint())
+		toward2 := probePoint.BearingTo(toward.Coord)
 		towardGap := math.Abs(toward1 - toward2)
 		if towardGap < c.setting.TowardRange || 360-towardGap < c.setting.TowardRange {
 			return true
@@ -149,7 +146,7 @@ func (c *LBS) isAvoid(cur drive.Coord, next drive.Coord, probePoint probe.Probe)
 	return false
 }
 
-func (c *LBS) Probes(cur drive.Coord, near float64) ([]probe.Probe, error) {
+func (c *LBS) Probes(cur geo.Coord, near float64) ([]probe.Probe, error) {
 	if near == 0 {
 		return c.probeManager.Probes, nil
 	}

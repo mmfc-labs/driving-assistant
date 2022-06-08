@@ -49,7 +49,7 @@ func NewAPIServer(opt Options) *APIServer {
 		validate: validate,
 	}
 
-	err := config.LoadConfig(opt.ConfigPath, func(setting config.Setting, probeManager probe.ProbeManager) {
+	err := config.LoadConfig(opt.ConfigPath, func(setting config.Setting, probeManager probe.Manager) {
 		probeManager.CalculateToward()
 		apiServer.lbs = lbs.NewLBS(setting, probeManager)
 		log.WithField("setting", setting).WithField("probeManager", probeManager).Info("重新加载配置成功")

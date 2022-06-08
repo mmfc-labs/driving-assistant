@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/go-resty/resty/v2"
 	"github.com/mmfc-labs/driving-assistant/pkg/apis"
+	"github.com/mmfc-labs/driving-assistant/pkg/geo"
 	"github.com/mmfc-labs/driving-assistant/pkg/lbs/drive"
 	log "github.com/sirupsen/logrus"
 	"github.com/xyctruth/stream"
@@ -28,16 +29,16 @@ func NewClient(key string) *Client {
 	return c
 }
 
-func (c *Client) GetRoutes(from, to drive.Coord, avoids []drive.Coord, avoidAreaOffset float64) ([]drive.Route, error) {
-	reduceFunc := func(r string, e drive.Coord) string {
-		avoidAreas := drive.ConvCoordToAvoidArea(e, avoidAreaOffset)
-		r += strings.Trim(stream.NewSliceByMapping[drive.Coord, string, string](avoidAreas).Reduce(func(r string, e drive.Coord) string {
+func (c *Client) GetRoutes(from, to geo.Coord, avoids []geo.Coord, avoidAreaOffset float64) ([]drive.Route, error) {
+	reduceFunc := func(r string, e geo.Coord) string {
+		avoidAreas := e.ToAvoidArea(avoidAreaOffset)
+		r += strings.Trim(stream.NewSliceByMapping[geo.Coord, string, string](avoidAreas).Reduce(func(r string, e geo.Coord) string {
 			r += fmt.Sprintf("%f,%f;", e.Lat, e.Lon)
 			return r
 		}), ";") + "|"
 		return r
 	}
-	avoidPolygonsParam := strings.Trim(stream.NewSliceByMapping[drive.Coord, string, string](avoids).Reduce(reduceFunc), "|")
+	avoidPolygonsParam := strings.Trim(stream.NewSliceByMapping[geo.Coord, string, string](avoids).Reduce(reduceFunc), "|")
 	params := map[string]string{
 		"from":     fmt.Sprintf("%f,%f", from.Lat, from.Lon),
 		"to":       fmt.Sprintf("%f,%f", to.Lat, to.Lon),
@@ -89,9 +90,9 @@ Retry:
 		for i := 2; i < len(route.Polyline); i++ {
 			route.Polyline[i] = route.Polyline[i-2] + route.Polyline[i]/1000000
 		}
-		points := make([]drive.Coord, 0, len(route.Polyline)/2)
+		points := make([]geo.Coord, 0, len(route.Polyline)/2)
 		for i := 0; i < len(route.Polyline); i = i + 2 {
-			points = append(points, drive.Coord{
+			points = append(points, geo.Coord{
 				Lat: route.Polyline[i],
 				Lon: route.Polyline[i+1],
 			})
@@ -103,13 +104,13 @@ Retry:
 	return routes, nil
 }
 
-func (c *Client) GetDistanceMatrix(froms, tos []drive.Coord) ([]int, error) {
-	reduceFunc := func(r string, e drive.Coord) string {
+func (c *Client) GetDistanceMatrix(froms, tos []geo.Coord) ([]int, error) {
+	reduceFunc := func(r string, e geo.Coord) string {
 		r += fmt.Sprintf("%f,%f;", e.Lat, e.Lon)
 		return r
 	}
-	fromParam := strings.Trim(stream.NewSliceByMapping[drive.Coord, string, string](froms).Reduce(reduceFunc), ";")
-	toParam := strings.Trim(stream.NewSliceByMapping[drive.Coord, string, string](tos).Reduce(reduceFunc), ";")
+	fromParam := strings.Trim(stream.NewSliceByMapping[geo.Coord, string, string](froms).Reduce(reduceFunc), ";")
+	toParam := strings.Trim(stream.NewSliceByMapping[geo.Coord, string, string](tos).Reduce(reduceFunc), ";")
 
 Retry:
 	resp, err := c.httpClient.R().

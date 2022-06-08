@@ -2,8 +2,8 @@ package probe
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/ghodss/yaml"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -19,8 +19,11 @@ func TestJson(t *testing.T) {
 		t.Error(err)
 	}
 
+	assert.Equal(t, float64(1), p.Lat)
+	assert.Equal(t, float64(2), p.Lon)
+
 	yamlStr := `
-  points:
+  probes:
     - lat: 22.57682
       lon: 113.913137
     - lat: 22.57759
@@ -36,10 +39,15 @@ func TestJson(t *testing.T) {
       lon: 113.914728
 `
 
-	p2 := ProbeManager{}
+	p2 := Manager{}
 	if err := yaml.Unmarshal([]byte(yamlStr), &p2); err != nil {
 		t.Error(err)
 	}
-	fmt.Println(p2)
+	assert.Equal(t, 5, len(p2.Probes))
+	assert.Equal(t, float64(22.57682), p2.Probes[0].Lat)
+	assert.Equal(t, float64(113.913137), p2.Probes[0].Lon)
+	assert.Equal(t, 1, len(p2.Probes[1].Towards))
+	assert.Equal(t, float64(22.577651), p2.Probes[1].Towards[0].Lat)
+	assert.Equal(t, float64(113.914054), p2.Probes[1].Towards[0].Lon)
 
 }
