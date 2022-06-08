@@ -8,7 +8,8 @@ jobs:
   update_configmap:
     runs-on: ubuntu-latest
     steps:
-      - name: deploy postgres to cluster
+      - uses: actions/checkout@v3
+      - name: update configmap
         uses: wahyd4/kubectl-helm-action@master
         env:
           KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
