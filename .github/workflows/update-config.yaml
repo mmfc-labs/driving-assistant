@@ -1,0 +1,17 @@
+name: UpdateConfig
+
+on:
+  workflow_dispatch:
+
+jobs:
+
+  update_configmap:
+    runs-on: ubuntu-latest
+    steps:
+      - name: deploy postgres to cluster
+        uses: wahyd4/kubectl-helm-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        with:
+          args: |
+            make update-configmap
