@@ -5,5 +5,4 @@ metadata:
   labels:
     {{- include "driving-assistant.labels" . | nindent 4 }}
 data:
-  config.yaml: |-
-    {{- .Values.configuration | nindent 4 }}
+{{ (.Files.Glob "config.yaml").AsConfig | indent 2 }}

@@ -84,7 +84,7 @@ Again:
 		}
 		stream.NewSlice(probePoints).ForEach(func(_ int, probePoint probe.Probe) {
 			if c.isAvoid(cur, next, probePoint) {
-				curToNextToProbeInfo := fmt.Sprintf("需要避让的探头,格式为(当前坐标串A1;下一个坐标串A2;探头坐标): %s", drive.FmtCoord(cur, next, probePoint.Coord))
+				curToNextToProbeInfo := fmt.Sprintf("第%d次路线规划,新增避让探头,格式为(当前坐标串A1;下一个坐标串A2;探头坐标): %s", routeCount, drive.FmtCoord(cur, next, probePoint.Coord))
 				log.Info(curToNextToProbeInfo)
 				debugCurToNextToProbe = append(debugCurToNextToProbe, curToNextToProbeInfo)
 				probesSet[probePoint.Coord] = struct{}{}

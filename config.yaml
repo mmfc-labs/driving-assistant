@@ -8,21 +8,732 @@ setting:
 
 probeManager:
   probes:
-    - lat: 22.57682
-      lon: 113.913137
-      towards: # 探头朝向的坐标，有可能多个
-        - lat: 22.576917
-          lon: 113.91323
-    - lat: 22.57759
+    - id: 0
+      name: 广东省深圳市宝安区大宝路47号(大宝路创业二路路口)
+      color: red
+      lat: 22.57759
       lon: 113.914101
-      towards: # 探头朝向的坐标，有可能多个
-        - lat: 22.577651
-          lon: 113.914054
-        - lat: 22.577566
-          lon: 113.914139
-    - lat: 22.576349
-      lon: 113.914133
-    - lat: 22.576952
-      lon: 113.914656
-    - lat: 22.576974
-      lon: 113.914728
+      towards:
+        - lat: 22.577267
+          lon: 113.914382
+          auth: ''
+          status: ''
+        - lat: 22.578052
+          lon: 113.913598
+          auth: manager
+          status: open
+        - lat: 22.578189
+          lon: 113.914824
+          auth: manager
+          status: open
+    - id: 0
+      name: 广东省深圳市宝安区大宝路33号(广深高速入口闸道)
+      color: red
+      lat: 22.571779
+      lon: 113.919897
+      towards:
+        - lat: 22.571816
+          lon: 113.920914
+          auth: ''
+          status: ''
+    - id: 0
+      name: 宝安区宝石路4-1号(中国石化佳运乐加油站西)
+      color: red
+      lat: 22.587346
+      lon: 113.92123
+      towards:
+        - lat: 22.586486
+          lon: 113.922076
+          auth: ''
+          status: ''
+        - lat: 22.587984
+          lon: 113.920525
+          auth: ''
+          status: ''
+    - id: 3367088583799309300
+      name: 107国道(广深公路)创业立交
+      color: red
+      lat: 22.564268
+      lon: 113.897331
+      towards:
+        - lat: 22.560873
+          lon: 113.89453
+          auth: ''
+          status: ''
+        - lat: 22.566645
+          lon: 113.901445
+          auth: ''
+          status: ''
+    - id: 0
+      name: 宝民一路裕安二路路口
+      color: red
+      lat: 22.567938
+      lon: 113.895748
+      towards:
+        - lat: 22.567732
+          lon: 113.895465
+          auth: ''
+          status: ''
+        - lat: 22.568742
+          lon: 113.89668
+          auth: ''
+          status: ''
+    - id: 721050423299532900
+      name: 宝民一路上川二路路口
+      color: red
+      lat: 22.571557
+      lon: 113.892056
+      towards:
+        - lat: 22.570801
+          lon: 113.892903
+          auth: manager
+          status: open
+        - lat: 22.572146
+          lon: 113.892752
+          auth: user
+          status: open
+        - lat: 22.571332
+          lon: 113.891604
+          auth: manager
+          status: unknown
+    - id: 0
+      name: 宝安区前进一路216号(深圳市文汇学校东北)
+      color: red
+      lat: 22.576684
+      lon: 113.896342
+      towards:
+        - lat: 22.575937
+          lon: 113.897125
+          auth: manager
+          status: open
+        - lat: 22.578373
+          lon: 113.894545
+          auth: manager
+          status: open
+    - id: 0
+      name: 前进二路与新安四路交叉口北
+      color: red
+      lat: 22.579982
+      lon: 113.893208
+      towards:
+        - lat: 22.5813
+          lon: 113.895239
+          auth: manager
+          status: close
+        - lat: 22.578389
+          lon: 113.894593
+          auth: manager
+          status: open
+        - lat: 22.578605
+          lon: 113.891661
+          auth: manager
+          status: close
+        - lat: 22.581422
+          lon: 113.891763
+          auth: manager
+          status: open
+    - id: 0
+      name: 广东省深圳市宝安区流塘路与前进二路交叉口
+      color: blue
+      lat: 22.583859
+      lon: 113.889254
+      towards:
+        - lat: 22.584733
+          lon: 113.890559
+          auth: manager
+          status: close
+        - lat: 22.582899
+          lon: 113.890143
+          auth: manager
+          status: close
+        - lat: 22.582478
+          lon: 113.887527
+          auth: manager
+          status: close
+        - lat: 22.5847
+          lon: 113.888353
+          auth: manager
+          status: close
+    - id: 0
+      name: 建安二路流塘路路口
+      color: red
+      lat: 22.581439
+      lon: 113.886258
+      towards:
+        - lat: 22.582462
+          lon: 113.887497
+          auth: manager
+          status: unknown
+        - lat: 22.580436
+          lon: 113.885026
+          auth: manager
+          status: open
+    - id: 0
+      name: 广东省深圳市宝安区广深路G107西乡段流塘天桥
+      color: red
+      lat: 22.579416
+      lon: 113.881812
+      towards:
+        - lat: 22.577939
+          lon: 113.883274
+          auth: manager
+          status: open
+        - lat: 22.580591
+          lon: 113.880654
+          auth: manager
+          status: open
+    - id: 0
+      name: 宝安区西乡大道锦花路口(御龙居东南)
+      color: red
+      lat: 22.590208
+      lon: 113.890855
+      towards:
+        - lat: 22.590422
+          lon: 113.89564
+          auth: manager
+          status: open
+        - lat: 22.589844
+          lon: 113.887388
+          auth: manager
+          status: open
+    - id: 0
+      name: 宝安大道与西乡大道交叉口
+      color: red
+      lat: 22.578218
+      lon: 113.867756
+      towards:
+        - lat: 22.579865
+          lon: 113.870694
+          auth: manager
+          status: open
+        - lat: 22.575879
+          lon: 113.870501
+          auth: manager
+          status: open
+        - lat: 22.575013
+          lon: 113.86593
+          auth: manager
+          status: open
+        - lat: 22.580195
+          lon: 113.865722
+          auth: manager
+          status: open
+    - id: 0
+      name: 西乡大道与兴业路交叉口
+      color: red
+      lat: 22.566465
+      lon: 113.857756
+      towards:
+        - lat: 22.568441
+          lon: 113.859633
+          auth: user
+          status: close
+        - lat: 22.565142
+          lon: 113.860065
+          auth: user
+          status: close
+        - lat: 22.565417
+          lon: 113.856745
+          auth: manager
+          status: open
+    - id: 0
+      name: 宝安区西乡大道沿江高速立交桥路段(佳鸿世界名车博览中心北)
+      color: red
+      lat: 22.563996
+      lon: 113.855125
+      towards:
+        - lat: 22.565733
+          lon: 113.857073
+          auth: manager
+          status: open
+        - lat: 22.562007
+          lon: 113.85341
+          auth: manager
+          status: open
+    - id: 7399816797504441000
+      name: 金湾大道西乡大道北侧
+      color: red
+      lat: 22.5611
+      lon: 113.85241
+      towards:
+        - lat: 22.55945
+          lon: 113.854288
+          auth: manager
+          status: open
+        - lat: 22.563258
+          lon: 113.850953
+          auth: manager
+          status: open
+    - id: 0
+      name: 铲岛路与绿海名居路交叉口(宝安第一外国语学校初中部)
+      color: red
+      lat: 22.562472
+      lon: 113.860379
+      towards:
+        - lat: 22.561948
+          lon: 113.861079
+          auth: user
+          status: open
+        - lat: 22.561973
+          lon: 113.859921
+          auth: manager
+          status: open
+        - lat: 22.562814
+          lon: 113.859948
+          auth: user
+          status: open
+    - id: 0
+      name: 金科路与罗田路交叉口北侧-新安润恒御园南
+      color: red
+      lat: 22.553065
+      lon: 113.873042
+      towards:
+        - lat: 22.551372
+          lon: 113.87469
+          auth: manager
+          status: open
+        - lat: 22.553945
+          lon: 113.872069
+          auth: manager
+          status: unknown
+    - id: 0
+      name: 新湖路与裕安一路交叉口(宝安体育场东)
+      color: red
+      lat: 22.557834
+      lon: 113.88389
+      towards:
+        - lat: 22.559653
+          lon: 113.886279
+          auth: manager
+          status: open
+        - lat: 22.556022
+          lon: 113.885907
+          auth: manager
+          status: unknown
+        - lat: 22.556341
+          lon: 113.882168
+          auth: manager
+          status: open
+        - lat: 22.559934
+          lon: 113.881713
+          auth: manager
+          status: open
+    - id: 2789728267864387000
+      name: 裕安一路与自由路交叉口
+      color: blue
+      lat: 22.565771
+      lon: 113.893027
+      towards:
+        - lat: 22.559934
+          lon: 113.881713
+          auth: user
+          status: close
+        - lat: 22.565003
+          lon: 113.893785
+          auth: user
+          status: close
+        - lat: 22.564995
+          lon: 113.892282
+          auth: user
+          status: close
+        - lat: 22.56645
+          lon: 113.892278
+          auth: user
+          status: close
+    - id: 0
+      name: 宝安大道甲岸路口(豪城馨庭居西南)
+      color: red
+      lat: 22.553456
+      lon: 113.897057
+      towards:
+        - lat: 22.550998
+          lon: 113.899433
+          auth: manager
+          status: open
+        - lat: 22.555397
+          lon: 113.894787
+          auth: manager
+          status: open
+    - id: 0
+      name: 广东省深圳市宝安区前进一路龙井二路段(御景台东)
+      color: red
+      lat: 22.559421
+      lon: 113.913764
+      towards:
+        - lat: 22.558271
+          lon: 113.914859
+          auth: user
+          status: open
+        - lat: 22.5609
+          lon: 113.912178
+          auth: manager
+          status: open
+    - id: 0
+      name: 广东省深圳市宝安区前进一路40号(阳光家庭)
+      color: red
+      lat: 22.558907
+      lon: 113.914341
+      towards:
+        - lat: 22.557784
+          lon: 113.915324
+          auth: manager
+          status: open
+        - lat: 22.560175
+          lon: 113.912902
+          auth: manager
+          status: open
+    - id: 0
+      name: 广东省深圳市宝安区湖滨东路27号荔山检查站入口(新鸿强餐厅东)
+      color: red
+      lat: 22.556539
+      lon: 113.914219
+      towards:
+        - lat: 22.556802
+          lon: 113.91459
+          auth: manager
+          status: open
+        - lat: 22.556204
+          lon: 113.913746
+          auth: user
+          status: open
+    - id: 0
+      name: 广深公路入北环大道辅道南头检查站(路南山区OT天台篮球公园(智恒店)东)
+      color: red
+      lat: 22.550742
+      lon: 113.909687
+      towards:
+        - lat: 22.550156
+          lon: 113.910955
+          auth: manager
+          status: open
+    - id: 0
+      name: 北环大道入广深公路辅道南头检查站出口（南方腾星汽车销售服务有限公司）-
+      color: red
+      lat: 22.549471
+      lon: 113.91239
+      towards: null
+    - id: 0
+      name: 南山区深南北环立交桥
+      color: red
+      lat: 22.548162
+      lon: 113.912967
+      towards:
+        - lat: 22.547066
+          lon: 113.911142
+          auth: manager
+          status: open
+    - id: 0
+      name: 月亮湾大道深南立交
+      color: red
+      lat: 22.541956
+      lon: 113.909549
+      towards:
+        - lat: 22.544555
+          lon: 113.9096
+          auth: manager
+          status: open
+    - id: 0
+      name: 南山区月亮湾大道桂湾三路北侧(北大附中深圳南山分校)
+      color: red
+      lat: 22.536955
+      lon: 113.909462
+      towards:
+        - lat: 22.533893
+          lon: 113.909604
+          auth: manager
+          status: open
+    - id: 0
+      name: 月亮湾大道东滨路交叉口南侧
+      color: red
+      lat: 22.515778
+      lon: 113.90577
+      towards:
+        - lat: 22.516972
+          lon: 113.907103
+          auth: manager
+          status: open
+    - id: 0
+      name: 广东省深圳市南山区前海路1019号鼎太风化人行天桥(鼎太风华六期东南)
+      color: red
+      lat: 22.515776
+      lon: 113.910517
+      towards:
+        - lat: 22.513545
+          lon: 113.908598
+          auth: manager
+          status: open
+        - lat: 22.519403
+          lon: 113.913721
+          auth: manager
+          status: open
+    - id: 0
+      name: 广东省深圳市南山区前海路广深沿江高速桥路段
+      color: red
+      lat: 22.507888
+      lon: 113.902739
+      towards:
+        - lat: 22.506669
+          lon: 113.900654
+          auth: manager
+          status: open
+        - lat: 22.51021
+          lon: 113.905239
+          auth: manager
+          status: open
+    - id: 0
+      name: 广东省深圳市南山区南海大道学府人行天桥(荟芳园南
+      color: red
+      lat: 22.52724
+      lon: 113.929301
+      towards:
+        - lat: 22.521378
+          lon: 113.929348
+          auth: manager
+          status: open
+        - lat: 22.529695
+          lon: 113.930474
+          auth: manager
+          status: open
+    - id: 0
+      name: 广东省深圳市南山区深南大道南海立交（腾讯大厦西南）
+      color: red
+      lat: 22.539641
+      lon: 113.933705
+      towards:
+        - lat: 22.53957
+          lon: 113.939411
+          auth: manager
+          status: open
+        - lat: 22.539672
+          lon: 113.931856
+          auth: manager
+          status: open
+    - id: 0
+      name: 广东省深圳市南山区沙河西路深南大道立交
+      color: red
+      lat: 22.540328
+      lon: 113.959057
+      towards:
+        - lat: 22.540321
+          lon: 113.956056
+          auth: manager
+          status: open
+    - id: 0
+      name: 广东省深圳市南山区沙河西路高新南九道交叉
+      color: red
+      lat: 22.529884
+      lon: 113.954853
+      towards:
+        - lat: 22.528326
+          lon: 113.954737
+          auth: user
+          status: open
+        - lat: 22.531342
+          lon: 113.954919
+          auth: manager
+          status: open
+    - id: 0
+      name: 南山区滨海大道沙河西路出口(东向西左转进沙河西路)
+      color: red
+      lat: 22.520853
+      lon: 113.953935
+      towards:
+        - lat: 22.531342
+          lon: 113.954919
+          auth: manager
+          status: open
+    - id: 0
+      name: 南山区滨海沙河东立交桥西南
+      color: red
+      lat: 22.520011
+      lon: 113.963335
+      towards:
+        - lat: 22.519779
+          lon: 113.970679
+          auth: manager
+          status: open
+        - lat: 22.520523
+          lon: 113.958221
+          auth: manager
+          status: open
+    - id: 0
+      name: 南山区北环沙河东立交桥
+      color: red
+      lat: 22.553714
+      lon: 113.966663
+      towards:
+        - lat: 22.554373
+          lon: 113.970304
+          auth: manager
+          status: open
+        - lat: 22.553369
+          lon: 113.958505
+          auth: manager
+          status: open
+    - id: 0
+      name: 南山区北环沙河西立交
+      color: red
+      lat: 22.553362
+      lon: 113.957812
+      towards:
+        - lat: 22.553386
+          lon: 113.962985
+          auth: manager
+          status: open
+        - lat: 22.552534
+          lon: 113.951222
+          auth: manager
+          status: open
+    - id: 0
+      name: 同安路荔山检查站出口
+      color: red
+      lat: 22.557182
+      lon: 113.920409
+      towards:
+        - lat: 22.556886
+          lon: 113.920665
+          auth: user
+          status: open
+        - lat: 22.557549
+          lon: 113.919863
+          auth: manager
+          status: open
+    - id: 0
+      name: 宝石路南光高速桥南300米
+      color: red
+      lat: 22.612899
+      lon: 113.925797
+      towards:
+        - lat: 22.610342
+          lon: 113.925718
+          auth: manager
+          status: open
+    - id: 0
+      name: 广东省深圳市宝安区牛成村路路口(陈村花场东)
+      color: red
+      lat: 22.614348
+      lon: 113.925939
+      towards:
+        - lat: 22.612899
+          lon: 113.925797
+          auth: manager
+          status: open
+        - lat: 22.617272
+          lon: 113.925993
+          auth: manager
+          status: open
+    - id: 0
+      name: 广东省深圳市宝安区宝石路南光高速桥北侧
+      color: red
+      lat: 22.61709
+      lon: 113.925913
+      towards:
+        - lat: 22.614348
+          lon: 113.925939
+          auth: manager
+          status: open
+        - lat: 22.619574
+          lon: 113.925918
+          auth: manager
+          status: open
+    - id: 0
+      name: 广东省深圳市宝安区南光高速公路宝石收费站北侧
+      color: red
+      lat: 22.618113
+      lon: 113.923267
+      towards: null
+    - id: 0
+      name: 松白路白芒检查站入口
+      color: red
+      lat: 22.6307
+      lon: 113.935143
+      towards:
+        - lat: 22.629012
+          lon: 113.936604
+          auth: manager
+          status: open
+    - id: 0
+      name: 宝石路松柏路路口
+      color: red
+      lat: 22.640975
+      lon: 113.926323
+      towards:
+        - lat: 22.641743
+          lon: 113.926559
+          auth: manager
+          status: unknown
+        - lat: 22.639265
+          lon: 113.926264
+          auth: manager
+          status: unknown
+        - lat: 22.641857
+          lon: 113.925192
+          auth: manager
+          status: open
+    - id: 0
+      name: 松柏路塘头一号路路口
+      color: red
+      lat: 22.640049
+      lon: 113.925105
+      towards:
+        - lat: 22.639332
+          lon: 113.925482
+          auth: manager
+          status: open
+        - lat: 22.639636
+          lon: 113.92426
+          auth: manager
+          status: open
+        - lat: 22.640945
+          lon: 113.924812
+          auth: user
+          status: open
+    - id: 0
+      name: 宝安区宝源路松茂柏景湾路口(西南方一个，北方一个)
+      color: red
+      lat: 22.586659
+      lon: 113.840625
+      towards:
+        - lat: 22.585875
+          lon: 113.841804
+          auth: manager
+          status: open
+        - lat: 22.587434
+          lon: 113.839524
+          auth: manager
+          status: open
+    - id: 0
+      name: 广东省深圳市宝安区金湾大道西湾公园北侧
+      color: red
+      lat: 22.591614
+      lon: 113.835298
+      towards:
+        - lat: 22.589727
+          lon: 113.835845
+          auth: manager
+          status: open
+        - lat: 22.593963
+          lon: 113.834876
+          auth: manager
+          status: open
+    - id: 3817868705845181000
+      name: 宝安大道与固戍一路交叉口
+      color: red
+      lat: 22.596883
+      lon: 113.849217
+      towards:
+        - lat: 22.594992
+          lon: 113.849976
+          auth: manager
+          status: open
+        - lat: 22.598804
+          lon: 113.848145
+          auth: user
+          status: open
+    - id: 0
+      name: 留仙一路创业二路路口
+      color: blue
+      lat: 22.578934
+      lon: 113.915625
+      towards: null
+
