@@ -7,7 +7,7 @@ jobs:
 
   update_configmap:
     runs-on: ubuntu-latest
-    environment: development
+    environment: development-configmap
     steps:
       - uses: actions/checkout@v3
       - name: update configmap
