@@ -123,9 +123,8 @@ func (c *LBS) isAvoid(cur geo.Coord, next geo.Coord, probePoint probe.Probe) boo
 	b2 := cur.Distance(probePoint.Coord)
 	b3 := probePoint.Distance(next)
 	//B1 >= B2+B3-offset 即路过探头
-	gap := b1 - (b2 + b3)
-
-	if gap+offsetKM <= 0 {
+	gap := b2 + b3 - b1
+	if gap > offsetKM {
 		return false
 	}
 
