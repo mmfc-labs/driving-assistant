@@ -557,6 +557,172 @@ probeManager:
           auth: manager
           status: open
     - id: 0
+      name: 南山区滨海大道侨城东立交
+      color: red
+      lat: 22.524458
+      lon: 113.999019
+      towards:
+        - lat: 22.525682
+          lon: 114.001011
+          auth: manager
+          status: unknown
+    - id: 0
+      name: 滨河大道广深高速桥
+      color: red
+      lat: 22.52805
+      lon: 114.019676
+      towards:
+        - lat: 22.528577
+          lon: 114.022083
+          auth: manager
+          status: open
+    - id: 0
+      name: 深南大道广深高速桥
+      color: red
+      lat: 22.534622
+      lon: 114.016712
+      towards:
+        - lat: 22.535124
+          lon: 114.019479
+          auth: manager
+          status: unknown
+    - id: 0
+      name: 滨河大道香蜜湖立交
+      color: red
+      lat: 22.528476
+      lon: 114.030652
+      towards:
+        - lat: 22.527423
+          lon: 114.035686
+          auth: manager
+          status: unknown
+    - id: 0
+      name: 红荔路香蜜湖天桥
+      color: red
+      lat: 22.543146
+      lon: 114.032009
+      towards:
+        - lat: 22.543445
+          lon: 114.03308
+          auth: manager
+          status: unknown
+    - id: 0
+      name: 香蜜湖路市委党校路段
+      color: red
+      lat: 22.547385
+      lon: 114.024168
+      towards:
+        - lat: 22.546153
+          lon: 114.02501
+          auth: manager
+          status: unknown
+    - id: 0
+      name: 北环大道侨香村人行天桥
+      color: red
+      lat: 22.554186
+      lon: 114.011364
+      towards:
+        - lat: 22.555363
+          lon: 114.014024
+          auth: manager
+          status: unknown
+    - id: 0
+      name: 芙蓉路新洲路口东侧
+      color: red
+      lat: 22.512303
+      lon: 114.045284
+      towards:
+        - lat: 22.511995
+          lon: 114.046191
+          auth: manager
+          status: unknown
+    - id: 0
+      name: 新洲路新洲南天桥
+      color: red
+      lat: 22.515531
+      lon: 114.045082
+      towards:
+        - lat: 22.514463
+          lon: 114.044422
+          auth: manager
+          status: unknown
+    - id: 0
+      name: 福强路福强人行天桥
+      color: red
+      lat: 22.516325
+      lon: 114.051299
+      towards:
+        - lat: 22.515838
+          lon: 114.05298
+          auth: manager
+          status: unknown
+    - id: 0
+      name: 新洲路福新立交
+      color: red
+      lat: 22.532355
+      lon: 114.04962
+      towards:
+        - lat: 22.530255
+          lon: 114.049655
+          auth: manager
+          status: unknown
+    - id: 0
+      name: 深南大道新洲立交
+      color: red
+      lat: 22.539665
+      lon: 114.049458
+      towards:
+        - lat: 22.539696
+          lon: 114.051128
+          auth: manager
+          status: unknown
+    - id: 0
+      name: 民田路福华一路口北侧
+      color: red
+      lat: 22.536806
+      lon: 114.052946
+      towards:
+        - lat: 22.537809
+          lon: 114.052923
+          auth: user
+          status: open
+    - id: 0
+      name: 益田路福华一路口南侧
+      color: red
+      lat: 22.536298
+      lon: 114.056363
+      towards:
+        - lat: 22.537296
+          lon: 114.056306
+          auth: manager
+          status: open
+    - id: 0
+      name: 益田路福华一路口北侧
+      color: red
+      lat: 22.538061
+      lon: 114.056298
+      towards:
+        - lat: 22.536787
+          lon: 114.056379
+          auth: manager
+          status: open
+    - id: 0
+      name: 福华三路会展中心路段
+      color: red
+      lat: 22.532688
+      lon: 114.06113
+      towards:
+        - lat: 22.532752
+          lon: 114.062803
+          auth: manager
+          status: unknown
+    - id: 0
+      name: 福华一路中心五路口东侧
+      color: red
+      lat: 22.536851
+      lon: 114.061109
+      towards: null
+    - id: 0
       name: 南山区北环沙河东立交桥
       color: red
       lat: 22.553714
@@ -730,6 +896,42 @@ probeManager:
           lon: 113.848145
           auth: user
           status: open
+    - id: 0
+      name: 航空路学子路路口
+      color: red
+      lat: 22.610817
+      lon: 113.852259
+      towards:
+        - lat: 22.611054
+          lon: 113.852833
+          auth: manager
+          status: unknown
+    - id: 0
+      name: 宝安区宝安大道航城大道路口
+      color: red
+      lat: 22.604146
+      lon: 113.845458
+      towards:
+        - lat: 22.604853
+          lon: 113.84722
+          auth: manager
+          status: unknown
+    - id: 0
+      name: ''
+      color: red
+      lat: 22.604417
+      lon: 113.83682
+      towards: null
+    - id: 0
+      name: 107国道(广深公路)南太人行天桥
+      color: red
+      lat: 22.604038
+      lon: 113.863582
+      towards:
+        - lat: 22.601936
+          lon: 113.865562
+          auth: manager
+          status: unknown
     - id: 0
       name: 留仙一路创业二路路口
       color: blue
