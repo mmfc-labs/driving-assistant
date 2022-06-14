@@ -11,8 +11,8 @@ import (
 func TestIsAvoid(t *testing.T) {
 	s := config.Setting{
 		LBSKey:      "KN6BZ-G526D-JAI4V-PGSJ2-6L5U6-YYFBV",
-		Offset:      6,
-		TowardRange: 90,
+		Offset:      10,
+		TowardRange: 70,
 	}
 
 	lbs := NewLBS(s, probe.Manager{})
@@ -63,8 +63,8 @@ func TestIsAvoid(t *testing.T) {
 func TestTriangleIsAvoid(t *testing.T) {
 	s := config.Setting{
 		LBSKey:      "KN6BZ-G526D-JAI4V-PGSJ2-6L5U6-YYFBV",
-		Offset:      6,
-		TowardRange: 90,
+		Offset:      10,
+		TowardRange: 70,
 	}
 
 	lbs := NewLBS(s, probe.Manager{})
@@ -105,7 +105,7 @@ func TestTriangleIsAvoid(t *testing.T) {
 		},
 		{
 			name: "三角形4",
-			cur:  geo.NewCoord(22.590321, 113.890844),
+			cur:  geo.NewCoord(22.590321, 113.887369),
 			next: geo.NewCoord(22.590321, 113.893954),
 			probe: probe.Probe{
 				Coord:   geo.NewCoord(22.590208, 113.890855),

@@ -32,23 +32,28 @@ func NewLBS(setting config.Setting, probeManager probe.Manager) *LBS {
 
 //Route 根据直线距离计算需要避让的探头
 //首先获取到路线A坐标串,不传入避让区
-//A1 -> A2 -> A3 -> A4 -> AN. 需要转弯的都会在十字路口都会有坐标串
+//A1 -> A2 -> A3 -> A4 -> AN 。 需要转弯的都会在十字路口都会有坐标串
 //
-//
-//条件一:
-//
-//A1 -> A2   直线距离 B1
+//条件一（距离条件）
+//A1 -> A2 直线距离 B1
 //A1 -> 探头1 直线距离 B2
 //探头1 -> A2 直线距离 B3
-//B1 >= B2+B3-offset 即路过探头
+//gap := b2 + b3 - b1
+//gap 小于 offset 为 true
 //
-// 条件二:
+//条件二 （三角高度条件）
+//A1 -> A2 -> 探头 组成一个三角形
+//已 A1 到 A2 位底线，探头为定点。获取三角形的高 h1
+//h1 小于 offset 为 true
 //
-//A1->A2             朝向toward1 （角度值）
-//探头->探头朝向坐标    朝向toward2 （角度值）
-//toward1 与 toward2 差值小于 TowardRange 则视为同一个方向
+//条件三 （朝向条件）
+//A1->A2 朝向toward1 （角度值）
+//探头->探头朝向坐标 朝向toward2 （角度值）
+//toward1 与 toward2 差值小于 towardRange 为 true
 //
-//满足条件一与条件二则需要避让该探头
+//满足三个条件都为true，则需要避让该探头
+//
+//然后累计需要避让的探头，重复调用路线规划（传入已经累计需要避让的探头），直到有一条路线不需要避让探头
 func (c *LBS) Route(from, to geo.Coord) (avoidAreas [][]geo.Coord, avoidProbes []geo.Coord, debug *apis.Debug, err error) {
 	probesSet := probe.NewProbeSet()
 	debug = &apis.Debug{}
@@ -116,21 +121,16 @@ Again:
 func (c *LBS) isAvoid(cur geo.Coord, next geo.Coord, probePoint probe.Probe) bool {
 	offsetKM := float64(c.setting.Offset) / 1000
 
-	//A1 -> A2   直线距离 B1
-	//A1 -> 探头1 直线距离 B2
-	//探头1 -> A2 直线距离 B3
+	// 距离条件
 	b1 := cur.Distance(next)
 	b2 := cur.Distance(probePoint.Coord)
 	b3 := probePoint.Distance(next)
-	//B1 >= B2+B3-offset 即路过探头
-	gap := b1 - (b2 + b3)
-	fmt.Println(gap)
-
-	if gap+offsetKM <= 0 {
+	gap := b2 + b3 - b1
+	if gap > offsetKM {
 		return false
 	}
 
-	//判断三角形的高度
+	// 三角形的高度条件
 	s := (b1 + b2 + b3) / 2
 	area := math.Sqrt(s * (s - b1) * (s - b2) * (s - b3))
 	height := area * 2 / b1
@@ -138,14 +138,11 @@ func (c *LBS) isAvoid(cur geo.Coord, next geo.Coord, probePoint probe.Probe) boo
 		return false
 	}
 
-	// 判断朝向
+	// 朝向条件
 	if len(probePoint.Towards) == 0 {
 		return true
 	}
 
-	// A1->A2             朝向toward1
-	// 探头->探头Towards    朝向toward2
-	// toward1 与 toward2 差值小于 TowardRange 则视为同一个方向
 	toward1 := cur.BearingTo(next)
 	for _, toward := range probePoint.Towards {
 		toward2 := probePoint.BearingTo(toward.Coord)
