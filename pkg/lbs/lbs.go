@@ -114,6 +114,7 @@ Again:
 
 // isAvoid 根绝 A1 A2 探头 来判断是否需要避让
 func (c *LBS) isAvoid(cur geo.Coord, next geo.Coord, probePoint probe.Probe) bool {
+	offsetKM := float64(c.setting.Offset) / 1000
 
 	//A1 -> A2   直线距离 B1
 	//A1 -> 探头1 直线距离 B2
@@ -122,12 +123,22 @@ func (c *LBS) isAvoid(cur geo.Coord, next geo.Coord, probePoint probe.Probe) boo
 	b2 := cur.Distance(probePoint.Coord)
 	b3 := probePoint.Distance(next)
 	//B1 >= B2+B3-offset 即路过探头
-	gap := b1 - (b2 + b3 - (float64(c.setting.Offset) / 1000))
+	gap := b1 - (b2 + b3)
+	fmt.Println(gap)
 
-	if gap <= 0 {
+	if gap+offsetKM <= 0 {
 		return false
 	}
 
+	//判断三角形的高度
+	s := (b1 + b2 + b3) / 2
+	area := math.Sqrt(s * (s - b1) * (s - b2) * (s - b3))
+	height := area * 2 / b1
+	if height > offsetKM {
+		return false
+	}
+
+	// 判断朝向
 	if len(probePoint.Towards) == 0 {
 		return true
 	}

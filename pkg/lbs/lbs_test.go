@@ -59,3 +59,65 @@ func TestIsAvoid(t *testing.T) {
 	}
 
 }
+
+func TestTriangleIsAvoid(t *testing.T) {
+	s := config.Setting{
+		LBSKey:      "KN6BZ-G526D-JAI4V-PGSJ2-6L5U6-YYFBV",
+		Offset:      6,
+		TowardRange: 90,
+	}
+
+	lbs := NewLBS(s, probe.Manager{})
+
+	tests := []struct {
+		name  string
+		cur   geo.Coord
+		next  geo.Coord
+		probe probe.Probe
+		want  bool
+	}{
+		{
+			name: "三角形1",
+			cur:  geo.NewCoord(22.590321, 113.890648),
+			next: geo.NewCoord(22.590321, 113.891083),
+			probe: probe.Probe{
+				Coord:   geo.NewCoord(22.590208, 113.890855),
+				Towards: nil},
+			want: false,
+		},
+		{
+			name: "三角形2",
+			cur:  geo.NewCoord(22.590321, 113.889722),
+			next: geo.NewCoord(22.590321, 113.891956),
+			probe: probe.Probe{
+				Coord:   geo.NewCoord(22.590208, 113.890855),
+				Towards: nil},
+			want: false,
+		},
+		{
+			name: "三角形3",
+			cur:  geo.NewCoord(22.590321, 113.887369),
+			next: geo.NewCoord(22.590321, 113.893954),
+			probe: probe.Probe{
+				Coord:   geo.NewCoord(22.590208, 113.890855),
+				Towards: nil},
+			want: false,
+		},
+		{
+			name: "三角形4",
+			cur:  geo.NewCoord(22.590321, 113.890844),
+			next: geo.NewCoord(22.590321, 113.893954),
+			probe: probe.Probe{
+				Coord:   geo.NewCoord(22.590208, 113.890855),
+				Towards: nil},
+			want: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			lbs.isAvoid(tt.cur, tt.next, tt.probe)
+			//assert.Equal(t, tt.want, lbs.isAvoid(tt.cur, tt.next, tt.probe))
+		})
+	}
+
+}
