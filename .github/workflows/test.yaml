@@ -22,7 +22,7 @@ jobs:
           stable: false
 
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: go mod package cache
         uses: actions/cache@v3
